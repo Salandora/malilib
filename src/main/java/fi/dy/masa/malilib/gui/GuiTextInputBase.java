@@ -6,7 +6,9 @@ import fi.dy.masa.malilib.gui.button.IButtonActionListener;
 import fi.dy.masa.malilib.render.RenderUtils;
 import fi.dy.masa.malilib.util.KeyCodes;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 
 public abstract class GuiTextInputBase extends GuiDialogBase
@@ -14,7 +16,7 @@ public abstract class GuiTextInputBase extends GuiDialogBase
     protected final GuiTextField textField;
     protected final String originalText;
 
-    public GuiTextInputBase(int maxTextLength, String titleKey, String defaultText, @Nullable GuiBase parent)
+    public GuiTextInputBase(int maxTextLength, String titleKey, String defaultText, @Nullable GuiScreen parent)
     {
         this.mc = Minecraft.getInstance();
         this.setParent(parent);
@@ -26,11 +28,12 @@ public abstract class GuiTextInputBase extends GuiDialogBase
         this.centerOnScreen();
 
         int width = Math.min(maxTextLength * 10, 240);
-        this.textField = new GuiTextFieldGeneric(0, this.mc.fontRenderer, this.dialogLeft + 12, this.dialogTop + 40, width, 20);
+        this.textField = new GuiTextFieldGeneric(this.dialogLeft + 12, this.dialogTop + 40, width, 20, this.mc.fontRenderer);
         this.textField.setMaxStringLength(maxTextLength);
         this.textField.setFocused(true);
         this.textField.setText(this.originalText);
         this.textField.setCursorPositionEnd();
+        this.zLevel = 1f;
     }
 
     @Override
@@ -53,7 +56,7 @@ public abstract class GuiTextInputBase extends GuiDialogBase
 
     protected void createButton(int x, int y, int buttonWidth, ButtonType type)
     {
-        ButtonGeneric button = new ButtonGeneric(0, x, y, buttonWidth, 20, I18n.format(type.getLabelKey()));
+        ButtonGeneric button = new ButtonGeneric(x, y, buttonWidth, 20, I18n.format(type.getLabelKey()));
         this.addButton(button, this.createActionListener(type));
     }
 
@@ -71,7 +74,10 @@ public abstract class GuiTextInputBase extends GuiDialogBase
             this.getParent().render(mouseX, mouseY, partialTicks);
         }
 
-        RenderUtils.drawOutlinedBox(this.dialogLeft, this.dialogTop, this.dialogWidth, this.dialogHeight, 0xB0000000, COLOR_HORIZONTAL_BAR);
+        GlStateManager.pushMatrix();
+        GlStateManager.translatef(0, 0, this.zLevel);
+
+        RenderUtils.drawOutlinedBox(this.dialogLeft, this.dialogTop, this.dialogWidth, this.dialogHeight, 0xE0000000, COLOR_HORIZONTAL_BAR);
 
         // Draw the title
         this.drawString(this.fontRenderer, this.getTitle(), this.dialogLeft + 10, this.dialogTop + 4, COLOR_WHITE);
@@ -80,6 +86,7 @@ public abstract class GuiTextInputBase extends GuiDialogBase
         this.textField.drawTextField(mouseX, mouseY, partialTicks);
 
         this.drawButtons(mouseX, mouseY, partialTicks);
+        GlStateManager.popMatrix();
     }
 
     @Override

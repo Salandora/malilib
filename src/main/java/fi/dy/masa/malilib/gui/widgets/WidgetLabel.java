@@ -1,7 +1,6 @@
 package fi.dy.masa.malilib.gui.widgets;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import fi.dy.masa.malilib.render.RenderUtils;
 import net.minecraft.client.Minecraft;
@@ -13,7 +12,7 @@ import net.minecraft.client.resources.I18n;
 public class WidgetLabel extends WidgetBase
 {
     protected final FontRenderer fontRenderer;
-    protected final List<String> labels;
+    protected final List<String> labels = new ArrayList<>();
     protected final int textColor;
     protected boolean visible = true;
     protected boolean centered;
@@ -29,8 +28,11 @@ public class WidgetLabel extends WidgetBase
 
         this.textColor = textColor;
         this.fontRenderer = Minecraft.getInstance().fontRenderer;
-        this.labels = new ArrayList<>();
-        this.labels.addAll(Arrays.asList(text));
+
+        for (String str : text)
+        {
+            this.addLine(str);
+        }
     }
 
     public void addLine(String key, Object... args)
@@ -63,7 +65,7 @@ public class WidgetLabel extends WidgetBase
 
             int fontHeight = this.fontRenderer.FONT_HEIGHT;
             int yCenter = this.y + this.height / 2 + this.borderSize / 2;
-            int yTextStart = yCenter - this.labels.size() * fontHeight / 2;
+            int yTextStart = yCenter - 1 - this.labels.size() * fontHeight / 2;
 
             for (int i = 0; i < this.labels.size(); ++i)
             {
@@ -92,10 +94,10 @@ public class WidgetLabel extends WidgetBase
 
             Gui.drawRect(xStart, yStart, xStart + bgWidth, yStart + bgHeight, this.backgroundColor);
 
-            RenderUtils.drawHorizontalLine(xStart, xStart + bgWidth, yStart, this.borderULColor);
-            RenderUtils.drawHorizontalLine(xStart, xStart + bgWidth, yStart + bgHeight, this.borderBRColor);
-            RenderUtils.drawVerticalLine(xStart, yStart, yStart + bgHeight, this.borderULColor);
-            RenderUtils.drawVerticalLine(xStart + bgWidth, yStart, yStart + bgHeight, this.borderBRColor);
+            RenderUtils.drawHorizontalLine(xStart, yStart           , bgWidth, this.borderULColor);
+            RenderUtils.drawHorizontalLine(xStart, yStart + bgHeight, bgWidth, this.borderBRColor);
+            RenderUtils.drawVerticalLine(xStart          , yStart, bgHeight, this.borderULColor);
+            RenderUtils.drawVerticalLine(xStart + bgWidth, yStart, bgHeight, this.borderBRColor);
         }
     }
 }

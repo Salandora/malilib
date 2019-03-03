@@ -14,9 +14,9 @@ public class ConfigButtonStringList extends ButtonGeneric
     private final IConfigGui configGui;
     @Nullable private final IDialogHandler dialogHandler;
 
-    public ConfigButtonStringList(int id, int x, int y, int width, int height, IConfigStringList config, IConfigGui configGui, @Nullable IDialogHandler dialogHandler)
+    public ConfigButtonStringList(int x, int y, int width, int height, IConfigStringList config, IConfigGui configGui, @Nullable IDialogHandler dialogHandler)
     {
-        super(id, x, y, width, height, "");
+        super(x, y, width, height, "");
 
         this.config = config;
         this.configGui = configGui;
@@ -28,9 +28,7 @@ public class ConfigButtonStringList extends ButtonGeneric
     @Override
     public void onMouseButtonClicked(int mouseButton)
     {
-        Minecraft mc = Minecraft.getInstance();
-
-        this.playPressSound(mc.getSoundHandler());
+        super.onMouseButtonClicked(mouseButton);
 
         if (this.dialogHandler != null)
         {
@@ -38,6 +36,7 @@ public class ConfigButtonStringList extends ButtonGeneric
         }
         else
         {
+            Minecraft mc = Minecraft.getInstance();
             mc.displayGuiScreen(new GuiStringListEdit(this.config, this.configGui, null, mc.currentScreen));
         }
     }

@@ -55,6 +55,11 @@ public abstract class GuiConfigsBase extends GuiListBase<ConfigOptionWrapper, Wi
         return this.height - 80;
     }
 
+    protected boolean useKeybindSearch()
+    {
+        return false;
+    }
+
     protected int getConfigWidth()
     {
         return this.configWidth;
@@ -104,7 +109,8 @@ public abstract class GuiConfigsBase extends GuiListBase<ConfigOptionWrapper, Wi
     @Override
     protected WidgetListConfigOptions createListWidget(int listX, int listY)
     {
-        return new WidgetListConfigOptions(listX, listY, this.getBrowserWidth(), this.getBrowserHeight(), this.getConfigWidth(), this);
+        return new WidgetListConfigOptions(listX, listY,
+                this.getBrowserWidth(), this.getBrowserHeight(), this.getConfigWidth(), this.zLevel, this.useKeybindSearch(), this);
     }
 
     @Override

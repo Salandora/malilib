@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.IButtonActionListener;
 import fi.dy.masa.malilib.gui.wrappers.ButtonWrapper;
+import fi.dy.masa.malilib.render.RenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderHelper;
 
@@ -18,7 +19,7 @@ public abstract class WidgetBase
     protected final int height;
     protected final float zLevel;
     protected final List<WidgetBase> subWidgets = new ArrayList<>();
-    protected final List<ButtonWrapper<?>> buttons = new ArrayList<>();
+    protected final List<ButtonWrapper<? extends ButtonBase>> buttons = new ArrayList<>();
     @Nullable
     protected WidgetBase hoveredSubWidget = null;
 
@@ -29,7 +30,7 @@ public abstract class WidgetBase
         this.width = width;
         this.height = height;
         this.zLevel = zLevel;
-        this.mc = Minecraft.getMinecraft();
+        this.mc = Minecraft.getInstance();
     }
 
     public int getWidth()
@@ -82,6 +83,58 @@ public abstract class WidgetBase
             if (entry.mousePressed(this.mc, mouseX, mouseY, mouseButton))
             {
                 // Don't call super if the button press got handled
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public final void onMouseReleased(int mouseX, int mouseY, int mouseButton)
+    {
+        if (this.subWidgets.isEmpty() == false)
+        {
+            for (WidgetBase widget : this.subWidgets)
+            {
+                widget.onMouseReleased(mouseX, mouseY, mouseButton);
+            }
+        }
+
+        this.onMouseReleasedImpl(mouseX, mouseY, mouseButton);
+    }
+
+    public void onMouseReleasedImpl(int mouseX, int mouseY, int mouseButton)
+    {
+    }
+
+    public final boolean onMouseScrolled(int mouseX, int mouseY, int mouseButton)
+    {
+        if (this.isMouseOver(mouseX, mouseY))
+        {
+            if (this.subWidgets.isEmpty() == false)
+            {
+                for (WidgetBase widget : this.subWidgets)
+                {
+                    if (widget.onMouseScrolled(mouseX, mouseY, mouseButton))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return this.onMouseScrolledImpl(mouseX, mouseY, mouseButton);
+        }
+
+        return false;
+    }
+
+    public boolean onMouseScrolledImpl(int mouseX, int mouseY, int mouseWheelDelta)
+    {
+        for (ButtonWrapper<?> entry : this.buttons)
+        {
+            if (entry.onMouseScrolled(this.mc, mouseX, mouseY, mouseWheelDelta))
+            {
+                // Don't call super if the action got handled
                 return true;
             }
         }
@@ -195,6 +248,16 @@ public abstract class WidgetBase
     public void postRenderHovered(int mouseX, int mouseY, boolean selected)
     {
         this.drawHoveredSubWidget(mouseX, mouseY);
+
+        for (int i = 0; i < this.buttons.size(); ++i)
+        {
+            ButtonBase button = this.buttons.get(i).getButton();
+
+            if (button.hasHoverText() && button.isMouseOver(mouseX, mouseY))
+            {
+                RenderUtils.drawHoverText(mouseX, mouseY, button.getHoverStrings());
+            }
+        }
     }
 
     protected void drawSubWidgets(int mouseX, int mouseY)

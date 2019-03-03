@@ -35,7 +35,6 @@ public class ButtonWrapper<T extends ButtonBase>
         if (this.button.isMouseOver(mouseX, mouseY))
         {
             this.button.onMouseButtonClicked(mouseButton);
-            this.button.playPressSound(minecraft.getSoundHandler());
 
             if (this.listener != null)
             {
@@ -51,5 +50,23 @@ public class ButtonWrapper<T extends ButtonBase>
     public void mouseReleased(Minecraft minecraft, int mouseX, int mouseY, int mouseButton)
     {
         this.button.mouseReleased(mouseX, mouseY, mouseButton);
+    }
+
+    public boolean onMouseScrolled(Minecraft mc, int mouseX, int mouseY, int mouseWheelDelta)
+    {
+        if (this.button.isMouseOver(mouseX, mouseY))
+        {
+            int mouseButton = mouseWheelDelta < 0 ? 1 : 0;
+            this.button.onMouseButtonClicked(mouseButton);
+
+            if (this.listener != null)
+            {
+                this.listener.actionPerformedWithButton(this.button, mouseButton);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

@@ -1,16 +1,15 @@
 package fi.dy.masa.malilib.gui.button;
 
 import fi.dy.masa.malilib.config.IConfigBoolean;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.TextFormatting;
 
 public class ConfigButtonBoolean extends ButtonGeneric
 {
     private final IConfigBoolean config;
 
-    public ConfigButtonBoolean(int id, int x, int y, int width, int height, IConfigBoolean config)
+    public ConfigButtonBoolean(int x, int y, int width, int height, IConfigBoolean config)
     {
-        super(id, x, y, width, height, "");
+        super(x, y, width, height, "");
         this.config = config;
 
         this.updateDisplayString();
@@ -21,7 +20,8 @@ public class ConfigButtonBoolean extends ButtonGeneric
     {
         this.config.setBooleanValue(! this.config.getBooleanValue());
         this.updateDisplayString();
-        this.playPressSound(Minecraft.getInstance().getSoundHandler());
+
+        super.onMouseButtonClicked(mouseButton);
     }
 
     @Override

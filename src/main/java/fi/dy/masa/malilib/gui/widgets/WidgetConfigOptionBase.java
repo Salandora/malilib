@@ -3,8 +3,9 @@ package fi.dy.masa.malilib.gui.widgets;
 import javax.annotation.Nullable;
 import fi.dy.masa.malilib.config.IConfigResettable;
 import fi.dy.masa.malilib.config.gui.ConfigOptionChangeListenerTextField;
-import fi.dy.masa.malilib.gui.GuiTextFieldWrapper;
+import fi.dy.masa.malilib.gui.GuiTextFieldGeneric;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
+import fi.dy.masa.malilib.gui.wrappers.TextFieldWrapper;
 import fi.dy.masa.malilib.util.KeyCodes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiTextField;
@@ -14,7 +15,7 @@ public abstract class WidgetConfigOptionBase<TYPE> extends WidgetListEntryBase<T
 {
     protected final Minecraft mc;
     protected final WidgetListConfigOptionsBase<?, ?> parent;
-    @Nullable protected GuiTextFieldWrapper textField = null;
+    @Nullable protected TextFieldWrapper<? extends GuiTextField> textField = null;
     @Nullable protected String initialStringValue;
     protected int maxTextfieldTextLength = 256;
     /**
@@ -46,24 +47,24 @@ public abstract class WidgetConfigOptionBase<TYPE> extends WidgetListEntryBase<T
 
     public abstract void applyNewValueToConfig();
 
-    protected GuiTextField createTextField(int id, int x, int y, int width, int height)
+    protected GuiTextField createTextField(int x, int y, int width, int height)
     {
-        return new GuiTextField(id, this.mc.fontRenderer, x + 2, y, width, height);
+        return new GuiTextFieldGeneric(x + 2, y, width, height, this.mc.fontRenderer);
     }
 
     protected void addTextField(GuiTextField field, ConfigOptionChangeListenerTextField listener)
     {
-        GuiTextFieldWrapper wrapper = new GuiTextFieldWrapper(field, listener);
+        TextFieldWrapper<? extends GuiTextField> wrapper = new TextFieldWrapper<>(field, listener);
         this.textField = wrapper;
         this.parent.addTextField(wrapper);
     }
 
-    protected ButtonGeneric createResetButton(int id, int x, int y, IConfigResettable config)
+    protected ButtonGeneric createResetButton(int x, int y, IConfigResettable config)
     {
         String labelReset = I18n.format("malilib.gui.button.reset.caps");
         int w = this.mc.fontRenderer.getStringWidth(labelReset) + 10;
 
-        ButtonGeneric resetButton = new ButtonGeneric(id, x, y, w, 20, labelReset);
+        ButtonGeneric resetButton = new ButtonGeneric(x, y, w, 20, labelReset);
         resetButton.enabled = config.isModified();
 
         return resetButton;
@@ -98,11 +99,12 @@ public abstract class WidgetConfigOptionBase<TYPE> extends WidgetListEntryBase<T
     @Override
     public boolean onKeyTypedImpl(int keyCode, int scanCode, int modifiers)
     {
-        if (this.textField != null)
+        if (this.textField != null && this.textField.isFocused())
         {
             if (keyCode == KeyCodes.KEY_ENTER)
             {
                 this.applyNewValueToConfig();
+                return true;
             }
             else
             {

@@ -39,7 +39,7 @@ public abstract class MixinMouseHelper
         int mouseY = (int) (((MouseHelper) (Object) this).getMouseY() * (double) window.getScaledHeight() / (double) window.getHeight());
         double amount = yoffset * this.minecraft.gameSettings.mouseWheelSensitivity;
 
-        if (InputEventHandler.getInstance().onMouseScroll(mouseX, mouseY, amount))
+        if (InputEventHandler.getInstance().onMouseScroll(mouseX, mouseY, amount, false))
         {
             ci.cancel();
         }
@@ -54,7 +54,7 @@ public abstract class MixinMouseHelper
         int mouseY = (int) (((MouseHelper) (Object) this).getMouseY() * (double) window.getScaledHeight() / (double) window.getHeight());
         final boolean keyState = action == GLFW.GLFW_PRESS;
 
-        if (InputEventHandler.getInstance().onMouseClick(mouseX, mouseY, button, keyState))
+        if (InputEventHandler.getInstance().onMouseInput(mouseX, mouseY, button, keyState, false))
         {
             ci.cancel();
         }

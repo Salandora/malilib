@@ -24,6 +24,16 @@ public class TextFieldWrapper<T extends GuiTextField>
         return this.listener;
     }
 
+    public boolean isFocused()
+    {
+        return this.textField.isFocused();
+    }
+
+    public void setFocused(boolean isFocused)
+    {
+        this.textField.setFocused(isFocused);
+    }
+
     public void onGuiClosed()
     {
         if (this.listener != null)
@@ -64,11 +74,11 @@ public class TextFieldWrapper<T extends GuiTextField>
 
     public boolean onCharTyped(char charIn, int modifiers)
     {
-        if (this.textField.charTyped(charIn, modifiers))
+        if (this.textField.isFocused() && this.textField.charTyped(charIn, modifiers))
         {
             if (this.listener != null)
             {
-                this.listener.onTextChange(this.textField);
+                this.listener.onTextChange(charIn, modifiers, this.textField);
             }
 
             return true;

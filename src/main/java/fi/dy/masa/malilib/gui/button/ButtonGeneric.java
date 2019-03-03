@@ -20,18 +20,23 @@ public class ButtonGeneric extends ButtonBase
     protected boolean textCentered;
     protected boolean renderDefaultBackground = true;
 
-    public ButtonGeneric(int id, int x, int y, int width, int height, String text, String... hoverStrings)
+    public ButtonGeneric(int x, int y, int width, int height, String text, String... hoverStrings)
     {
-        this(id, x, y, width, height, text, null, hoverStrings);
+        this(x, y, width, height, text, null, hoverStrings);
 
         this.textCentered = true;
     }
 
-    public ButtonGeneric(int id, int x, int y, int width, int height, String text, IGuiIcon icon, String... hoverStrings)
+    public ButtonGeneric(int x, int y, int width, int height, String text, IGuiIcon icon, String... hoverStrings)
     {
-        super(id, x, y, width, height, text);
+        super(x, y, width, height, text);
 
         this.icon = icon;
+
+        if (width == -1 && icon != null)
+        {
+            this.width += icon.getWidth() + 8;
+        }
 
         if (hoverStrings.length > 0)
         {
@@ -39,9 +44,9 @@ public class ButtonGeneric extends ButtonBase
         }
     }
 
-    public ButtonGeneric(int id, int x, int y, IGuiIcon icon, String... hoverStrings)
+    public ButtonGeneric(int x, int y, IGuiIcon icon, String... hoverStrings)
     {
-        this(id, x, y, icon.getWidth(), icon.getHeight(), "", icon, hoverStrings);
+        this(x, y, icon.getWidth(), icon.getHeight(), "", icon, hoverStrings);
 
         this.setRenderDefaultBackground(false);
     }
@@ -52,6 +57,12 @@ public class ButtonGeneric extends ButtonBase
         return this;
     }
 
+    /**
+     * Set the icon aligment.<br>
+     * Note: Only LEFT and RIGHT alignments work properly.
+     * @param alignment
+     * @return
+     */
     public ButtonGeneric setIconAlignment(LeftRight alignment)
     {
         this.alignment = alignment;
@@ -112,6 +123,8 @@ public class ButtonGeneric extends ButtonBase
                 this.drawTexturedModalRect(this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + buttonStyle * 20, this.width / 2, this.height);
             }
 
+            //this.mouseDragged(mc, mouseX, mouseY);
+
             if (this.icon != null)
             {
                 int offset = this.renderDefaultBackground ? 4 : 0;
@@ -154,5 +167,23 @@ public class ButtonGeneric extends ButtonBase
                 }
             }
         }
+    }
+
+    public static ButtonGeneric createGeneric(int x, int y, int width, boolean rightAlign, String translationKey, Object... args)
+    {
+        String label = I18n.format(translationKey, args);
+
+        if (width < 0)
+        {
+            Minecraft mc = Minecraft.getInstance();
+            width = mc.fontRenderer.getStringWidth(label) + 10;
+        }
+
+        if (rightAlign)
+        {
+            x -= width;
+        }
+
+        return new ButtonGeneric(x, y, width, 20, label);
     }
 }
