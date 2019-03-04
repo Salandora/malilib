@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import fi.dy.masa.malilib.config.IConfigBase;
+import fi.dy.masa.malilib.event.InputEventHandler;
 import fi.dy.masa.malilib.gui.Message.MessageType;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.gui.button.IButtonActionListener;
@@ -15,6 +16,7 @@ import fi.dy.masa.malilib.gui.widgets.WidgetCheckBox;
 import fi.dy.masa.malilib.gui.widgets.WidgetLabel;
 import fi.dy.masa.malilib.gui.wrappers.ButtonWrapper;
 import fi.dy.masa.malilib.gui.wrappers.TextFieldWrapper;
+import fi.dy.masa.malilib.hotkeys.KeybindMulti;
 import fi.dy.masa.malilib.interfaces.IStringConsumer;
 import fi.dy.masa.malilib.render.MessageRenderer;
 import fi.dy.masa.malilib.render.RenderUtils;
@@ -27,6 +29,7 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
+import org.lwjgl.glfw.GLFW;
 
 public abstract class GuiBase extends GuiScreen implements IMessageConsumer, IStringConsumer
 {
@@ -273,13 +276,13 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
                 {
                     entry.setFocused(false);
                     selected = i;
+                    handled = true;
                 }
-                else
+                else if (entry.onKeyTyped(keyCode, scanCode, modifiers))
                 {
-                    entry.onKeyTyped(keyCode, scanCode, modifiers);
+                    handled = true;
                 }
 
-                handled = keyCode != KeyCodes.KEY_ESCAPE;
                 break;
             }
         }
@@ -336,6 +339,18 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
             if (entry.onCharTyped(charIn, modifiers))
             {
                 handled = true;
+            }
+        }
+
+        if (handled == false)
+        {
+            for (WidgetBase widget : this.widgets)
+            {
+                if (widget.onCharTyped(charIn, modifiers))
+                {
+                    handled = true;
+                    break;
+                }
             }
         }
 

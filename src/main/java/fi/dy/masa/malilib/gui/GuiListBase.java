@@ -149,6 +149,22 @@ public abstract class GuiListBase<TYPE, WIDGET extends WidgetListEntryBase<TYPE>
     }
 
     @Override
+    public boolean onCharTyped(char charIn, int modifiers)
+    {
+        // Try to handle everything in the parent first
+        if (super.onCharTyped(charIn, modifiers))
+        {
+            return true;
+        }
+        else if (this.getListWidget() != null && this.getListWidget().onCharTyped(charIn, modifiers))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
     public void setWorldAndResolution(Minecraft mc, int width, int height)
     {
         super.setWorldAndResolution(mc, width, height);

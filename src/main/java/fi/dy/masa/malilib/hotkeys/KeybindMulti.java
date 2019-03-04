@@ -20,7 +20,7 @@ import net.minecraft.client.Minecraft;
 
 public class KeybindMulti implements IKeybind
 {
-    public static final ConfigBoolean KEYBIND_DEBUG = new ConfigBoolean("keybindDebugging", true, "When enabled, key presses and held keys are\nprinted to the game console (and the action bar, if enabled)");
+    public static final ConfigBoolean KEYBIND_DEBUG = new ConfigBoolean("keybindDebugging", false, "When enabled, key presses and held keys are\nprinted to the game console (and the action bar, if enabled)");
     public static final ConfigBoolean KEYBIND_DEBUG_ACTIONBAR = new ConfigBoolean("keybindDebuggingIngame", true, "If enabled, then the messages from 'keybindDebugging'\nare also printed to the in-game action bar");
 
     private static List<Integer> pressedKeys = new ArrayList<>();

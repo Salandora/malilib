@@ -208,13 +208,18 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
 
     @Override
     public boolean onCharTyped(char charIn, int modifiers) {
-        for (WIDGET widget : this.listWidgets) {
-            if (widget.onCharTyped(charIn, modifiers)) {
-                return true;
+        if (this.widgetSearchBar != null && this.widgetSearchBar.onCharTyped(charIn, modifiers)) {
+            return true;
+        }
+        else {
+            for (WIDGET widget : this.listWidgets) {
+                if (widget.onCharTyped(charIn, modifiers)) {
+                    return true;
+                }
             }
         }
 
-        return super.onCharTyped(charIn, modifiers);
+        return false;
     }
 
     protected Collection<TYPE> getAllEntries()

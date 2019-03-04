@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.MutableBoundingBox;
 import org.lwjgl.opengl.GL11;
 import fi.dy.masa.malilib.config.HudAlignment;
 import fi.dy.masa.malilib.util.Color4f;
@@ -587,7 +588,7 @@ public class RenderUtils
         buffer.pos(minX, maxY, maxZ).color(color.r, color.g, color.b, color.a).endVertex();
     }
 
-    public static void drawBox(AxisAlignedBB bb, Color4f color, BufferBuilder bufferQuads, BufferBuilder bufferLines)
+    public static void drawBox(MutableBoundingBox bb, Color4f color, BufferBuilder bufferQuads, BufferBuilder bufferLines)
     {
         double minX = bb.minX;
         double minY = bb.minY;

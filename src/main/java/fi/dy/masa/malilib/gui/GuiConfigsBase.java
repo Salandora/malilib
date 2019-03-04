@@ -150,6 +150,7 @@ public abstract class GuiConfigsBase extends GuiListBase<ConfigOptionWrapper, Wi
         if (this.activeKeybindButton != null)
         {
             this.activeKeybindButton.onKeyPressed(keyCode);
+
             return true;
         }
         else
@@ -167,6 +168,17 @@ public abstract class GuiConfigsBase extends GuiListBase<ConfigOptionWrapper, Wi
 
             return false;
         }
+    }
+
+    @Override
+    public boolean onCharTyped(char charIn, int modifiers)
+    {
+        if (this.activeKeybindButton != null)
+        {
+            return true;
+        }
+
+        return super.onCharTyped(charIn, modifiers);
     }
 
     @Override

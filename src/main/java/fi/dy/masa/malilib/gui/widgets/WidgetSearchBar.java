@@ -97,7 +97,11 @@ public class WidgetSearchBar extends WidgetBase
     @Override
     public boolean onCharTypedImpl(char charIn, int modifiers)
     {
-        if (SharedConstants.isAllowedCharacter(charIn))
+        if (this.searchOpen)
+        {
+            return this.searchBox.charTyped(charIn, modifiers);
+        }
+        /*else if (SharedConstants.isAllowedCharacter(charIn))
         {
             this.searchOpen = true;
             this.searchBox.setFocused(true);
@@ -105,7 +109,7 @@ public class WidgetSearchBar extends WidgetBase
             this.searchBox.setCursorPositionEnd();
             this.searchBox.charTyped(charIn, modifiers);
             return true;
-        }
+        }*/
 
         return false;
     }

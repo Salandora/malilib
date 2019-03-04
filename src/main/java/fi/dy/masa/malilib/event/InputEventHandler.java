@@ -163,7 +163,7 @@ public class InputEventHandler implements IKeybindManager
 
         cancel = this.checkKeyBindsForChanges(keyCode);
 
-        if (this.keyboardHandlers.isEmpty() == false)
+        if (!cancel && this.keyboardHandlers.isEmpty() == false)
         {
             for (IKeyboardInputHandler handler : this.keyboardHandlers)
             {
