@@ -4,6 +4,7 @@ import fi.dy.masa.malilib.mixin.IGuiTextField;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.renderer.GlStateManager;
 
 public class GuiTextFieldGeneric extends GuiTextField
 {
@@ -42,6 +43,30 @@ public class GuiTextFieldGeneric extends GuiTextField
         if (this.isFocused() != wasFocused)
         {
             Minecraft.getInstance().keyboardListener.enableRepeatEvents(this.isFocused());
+        }
+    }
+
+    public GuiTextFieldGeneric setZLevel(float zLevel)
+    {
+        this.zLevel = zLevel;
+        return this;
+    }
+
+    @Override
+    public void drawTextField(int mouseX, int mouseY, float partialTicks)
+    {
+        if (this.zLevel != 0)
+        {
+            GlStateManager.pushMatrix();
+            GlStateManager.translatef(0, 0, this.zLevel);
+
+            super.drawTextField(mouseX, mouseY, partialTicks);
+
+            GlStateManager.popMatrix();
+        }
+        else
+        {
+            super.drawTextField(mouseX, mouseY, partialTicks);
         }
     }
 }

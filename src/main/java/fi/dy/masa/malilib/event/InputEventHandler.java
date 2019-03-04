@@ -154,7 +154,7 @@ public class InputEventHandler implements IKeybindManager
     /**
      * NOT PUBLIC API - DO NOT CALL
      */
-    public boolean onKeyInput(int keyCode, int scanCode, boolean eventKeyState, boolean isGui)
+    public boolean onKeyInput(int keyCode, int scanCode, boolean eventKeyState)
     {
         boolean cancel = false;
 
@@ -180,7 +180,7 @@ public class InputEventHandler implements IKeybindManager
     /**
      * NOT PUBLIC API - DO NOT CALL
      */
-    public boolean onMouseInput(int mouseX, int mouseY, int eventButton, boolean eventButtonState, boolean isGui)
+    public boolean onMouseInput(int mouseX, int mouseY, int eventButton, boolean eventButtonState)
     {
         boolean cancel = false;
 
@@ -209,7 +209,7 @@ public class InputEventHandler implements IKeybindManager
     /**
      * NOT PUBLIC API - DO NOT CALL
      */
-    public boolean onMouseScroll(final int mouseX, final int mouseY, final double amount, boolean isGui)
+    public boolean onMouseScroll(final int mouseX, final int mouseY, final double amount)
     {
         boolean cancel = false;
 

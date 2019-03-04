@@ -17,6 +17,7 @@ import net.minecraft.item.ItemStack;
 @Mixin(GuiScreen.class)
 public abstract class MixinGuiScreen extends Gui
 {
+    /*
     @Shadow
     protected Minecraft mc;
 
@@ -26,7 +27,7 @@ public abstract class MixinGuiScreen extends Gui
         RenderEventHandler.getInstance().onRenderTooltipLast(stack, x, y);
     }
 
-    /*@Inject(method = "sendChatMessage(Ljava/lang/String;Z)V", at = @At(
+    @Inject(method = "sendChatMessage(Ljava/lang/String;Z)V", at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/client/entity/EntityPlayerSP;sendChatMessage(Ljava/lang/String;)V"),
             cancellable = true)
@@ -34,55 +35,6 @@ public abstract class MixinGuiScreen extends Gui
     {
         if (ClientCommandHandler.INSTANCE.executeCommand(this.mc.player, msg) != 0)
         {
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "handleInput", cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiScreen;handleKeyboardInput()V"))
-    private void onKeyboardInputGui(CallbackInfo ci) throws IOException
-    {
-        if (InputEventHandler.getInstance().onKeyInput(true))
-        {
-            // Use up the rest of the events
-            while (Keyboard.next())
-            {
-                if (InputEventHandler.getInstance().onKeyInput(true) == false)
-                {
-                    ((GuiScreen) (Object) this).handleKeyboardInput();
-                }
-            }
-
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "handleInput", cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiScreen;handleMouseInput()V"))
-    private void onMouseInputGui(CallbackInfo ci) throws IOException
-    {
-        if (InputEventHandler.getInstance().onMouseInput(true))
-        {
-            // Use up the rest of the events
-            while (Mouse.next())
-            {
-                if (InputEventHandler.getInstance().onMouseInput(true) == false)
-                {
-                    ((GuiScreen) (Object) this).handleMouseInput();
-                }
-            }
-
-            // Use up the rest of the events
-            // The vanilla keyboard handling that comes after the mouse handling will get skipped when this method cancels,
-            // and these events would then leak to the non-GUI handling code in Minecraft#runTick())
-            while (Keyboard.next())
-            {
-                if (InputEventHandler.getInstance().onKeyInput(true) == false)
-                {
-                    ((GuiScreen) (Object) this).handleKeyboardInput();
-                }
-            }
-
             ci.cancel();
         }
     }*/

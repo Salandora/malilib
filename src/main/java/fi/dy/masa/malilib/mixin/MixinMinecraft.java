@@ -39,12 +39,6 @@ public abstract class MixinMinecraft implements IMinecraftAccessor
         KeybindMulti.reCheckPressedKeys();
     }
 
-    @Inject(method = "runTick()V", at = @At("RETURN"))
-    private void onRunTickEnd(CallbackInfo ci)
-    {
-        TickHandler.getInstance().onClientTick((Minecraft)(Object) this);
-    }
-
     @Inject(method = "loadWorld(Lnet/minecraft/client/multiplayer/WorldClient;Lnet/minecraft/client/gui/GuiScreen;)V", at = @At("HEAD"))
     private void onLoadWorldPre(@Nullable WorldClient worldClientIn, GuiScreen screen, CallbackInfo ci)
     {
