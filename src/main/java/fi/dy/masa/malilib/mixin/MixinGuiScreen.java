@@ -17,7 +17,6 @@ import net.minecraft.item.ItemStack;
 @Mixin(GuiScreen.class)
 public abstract class MixinGuiScreen extends Gui
 {
-    /*
     @Shadow
     protected Minecraft mc;
 
@@ -27,7 +26,7 @@ public abstract class MixinGuiScreen extends Gui
         RenderEventHandler.getInstance().onRenderTooltipLast(stack, x, y);
     }
 
-    @Inject(method = "sendChatMessage(Ljava/lang/String;Z)V", at = @At(
+    /*@Inject(method = "sendChatMessage(Ljava/lang/String;Z)V", at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/client/entity/EntityPlayerSP;sendChatMessage(Ljava/lang/String;)V"),
             cancellable = true)
