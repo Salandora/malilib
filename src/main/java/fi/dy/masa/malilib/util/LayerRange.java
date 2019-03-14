@@ -14,6 +14,7 @@ import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.util.text.TextFormatting;
 
 public class LayerRange
@@ -596,7 +597,7 @@ public class LayerRange
         }
     }
 
-    public boolean intersects(AxisAlignedBB box)
+    public boolean intersects(MutableBoundingBox box)
     {
         switch (this.axis)
         {
@@ -628,7 +629,7 @@ public class LayerRange
     }
 
     @Nullable
-    public AxisAlignedBB getClampedRenderBoundingBox(AxisAlignedBB box)
+    public AxisAlignedBB getClampedRenderBoundingBox(MutableBoundingBox box)
     {
         if (this.intersects(box) == false)
         {

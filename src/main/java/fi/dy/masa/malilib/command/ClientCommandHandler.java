@@ -74,7 +74,7 @@ public class ClientCommandHandler// extends CommandHandler
         {
             leftOfCursor = leftOfCursor.substring(1);
 
-            Minecraft mc = Minecraft.getMinecraft();
+            Minecraft mc = Minecraft.getInstance();
 
             if (mc.currentScreen instanceof GuiChat)
             {
@@ -109,7 +109,7 @@ public class ClientCommandHandler// extends CommandHandler
     @Override
     protected MinecraftServer getServer()
     {
-        return Minecraft.getMinecraft().getIntegratedServer();
+        return Minecraft.getInstance().getIntegratedServer();
     }
     */
 }
