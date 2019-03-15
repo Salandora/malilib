@@ -28,7 +28,6 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
     protected int totalHeight;
     protected int browserWidth;
     protected int browserHeight;
-    protected int entryHeight;
     protected int browserEntriesStartX;
     protected int browserEntriesStartY;
     protected int browserEntriesOffsetY;
@@ -43,7 +42,7 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
     protected boolean allowMultiSelection;
     protected boolean shouldSortList;
     @Nullable private TYPE lastSelectedEntry;
-    @Nullable private final ISelectionListener<TYPE> selectionListener;
+    @Nullable private ISelectionListener<TYPE> selectionListener;
     @Nullable protected WidgetSearchBar widgetSearchBar;
 
     public WidgetListBase(int x, int y, int width, int height, @Nullable ISelectionListener<TYPE> selectionListener)
@@ -533,5 +532,12 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
     public void resetScrollbarPosition()
     {
         this.scrollBar.setValue(0);
+    }
+
+    public WidgetSearchBar getSearchBarWidget() { return widgetSearchBar; }
+
+    public void setSelectionListener(ISelectionListener<TYPE> listener)
+    {
+        this.selectionListener = listener;
     }
 }

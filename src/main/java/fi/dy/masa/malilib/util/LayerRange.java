@@ -597,6 +597,27 @@ public class LayerRange
         }
     }
 
+    public boolean intersects(AxisAlignedBB box)
+    {
+        switch (this.axis)
+        {
+            case X:
+            {
+                return (box.maxX < this.getLayerMin() || box.minX > this.getLayerMax()) == false;
+            }
+            case Y:
+            {
+                return (box.maxY < this.getLayerMin() || box.minY > this.getLayerMax()) == false;
+            }
+            case Z:
+            {
+                return (box.maxZ < this.getLayerMin() || box.minZ > this.getLayerMax()) == false;
+            }
+            default:
+                return false;
+        }
+    }
+
     public boolean intersects(MutableBoundingBox box)
     {
         switch (this.axis)
@@ -618,6 +639,32 @@ public class LayerRange
         }
     }
 
+    public boolean intersectsBox(BlockPos posMin, BlockPos posMax)
+    {
+        return this.intersectsBox(posMin.getX(), posMin.getY(), posMin.getZ(), posMax.getX(), posMax.getY(), posMax.getZ());
+    }
+
+    public boolean intersectsBox(int minX, int minY, int minZ, int maxX, int maxY, int maxZ)
+    {
+        switch (this.axis)
+        {
+            case X:
+            {
+                return (maxX < this.getLayerMin() || minX > this.getLayerMax()) == false;
+            }
+            case Y:
+            {
+                return (maxY < this.getLayerMin() || minY > this.getLayerMax()) == false;
+            }
+            case Z:
+            {
+                return (maxZ < this.getLayerMin() || minZ > this.getLayerMax()) == false;
+            }
+            default:
+                return false;
+        }
+    }
+
     public int getClampedValue(int value, EnumFacing.Axis type)
     {
         if (this.axis == type)
@@ -629,7 +676,7 @@ public class LayerRange
     }
 
     @Nullable
-    public AxisAlignedBB getClampedRenderBoundingBox(MutableBoundingBox box)
+    public AxisAlignedBB getClampedRenderBoundingBox(AxisAlignedBB box)
     {
         if (this.intersects(box) == false)
         {
@@ -655,6 +702,78 @@ public class LayerRange
                 final double zMin = Math.max(box.minZ, this.getLayerMin());
                 final double zMax = Math.min(box.maxZ, this.getLayerMax());
                 return new AxisAlignedBB(box.minX, box.minY, zMin, box.maxX, box.maxY, zMax);
+            }
+            default:
+                return null;
+        }
+    }
+
+    @Nullable
+    public MutableBoundingBox getClampedRenderBoundingBox(MutableBoundingBox box)
+    {
+        if (this.intersects(box) == false)
+        {
+            return null;
+        }
+
+        switch (this.axis)
+        {
+            case X:
+            {
+                final int xMin = Math.max(box.minX, this.getLayerMin());
+                final int xMax = Math.min(box.maxX, this.getLayerMax());
+                return new MutableBoundingBox(xMin, box.minY, box.minZ, xMax, box.maxY, box.maxZ);
+            }
+            case Y:
+            {
+                final int yMin = Math.max(box.minY, this.getLayerMin());
+                final int yMax = Math.min(box.maxY, this.getLayerMax());
+                return new MutableBoundingBox(box.minX, yMin, box.minZ, box.maxX, yMax, box.maxZ);
+            }
+            case Z:
+            {
+                final int zMin = Math.max(box.minZ, this.getLayerMin());
+                final int zMax = Math.min(box.maxZ, this.getLayerMax());
+                return new MutableBoundingBox(box.minX, box.minY, zMin, box.maxX, box.maxY, zMax);
+            }
+            default:
+                return null;
+        }
+    }
+
+    @Nullable
+    public MutableBoundingBox getClampedArea(BlockPos posMin, BlockPos posMax)
+    {
+        return this.getClampedArea(posMin.getX(), posMin.getY(), posMin.getZ(), posMax.getX(), posMax.getY(), posMax.getZ());
+    }
+
+    @Nullable
+    public MutableBoundingBox getClampedArea(int minX, int minY, int minZ, int maxX, int maxY, int maxZ)
+    {
+        if (this.intersectsBox(minX, minY, minZ, maxX, maxY, maxZ) == false)
+        {
+            return null;
+        }
+
+        switch (this.axis)
+        {
+            case X:
+            {
+                final int xMin = Math.max(minX, this.getLayerMin());
+                final int xMax = Math.min(maxX, this.getLayerMax());
+                return MutableBoundingBox.createProper(xMin, minY, minZ, xMax, maxY, maxZ);
+            }
+            case Y:
+            {
+                final int yMin = Math.max(minY, this.getLayerMin());
+                final int yMax = Math.min(maxY, this.getLayerMax());
+                return MutableBoundingBox.createProper(minX, yMin, minZ, maxX, yMax, maxZ);
+            }
+            case Z:
+            {
+                final int zMin = Math.max(minZ, this.getLayerMin());
+                final int zMax = Math.min(maxZ, this.getLayerMax());
+                return MutableBoundingBox.createProper(minX, minY, zMin, maxX, maxY, zMax);
             }
             default:
                 return null;
