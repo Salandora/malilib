@@ -1,7 +1,9 @@
 package fi.dy.masa.malilib;
 
+import fi.dy.masa.malilib.event.TickHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.dimdev.rift.listener.client.ClientTickable;
 import org.dimdev.rift.listener.client.OverlayRenderer;
 import org.dimdev.riftloader.listener.InitializationListener;
 import org.spongepowered.asm.launch.MixinBootstrap;
@@ -14,7 +16,7 @@ import fi.dy.masa.malilib.interfaces.IInitializationHandler;
 import fi.dy.masa.malilib.reference.MaLiLibReference;
 import net.minecraft.client.Minecraft;
 
-public class MaLiLib implements InitializationListener, OverlayRenderer
+public class MaLiLib implements InitializationListener, OverlayRenderer, ClientTickable
 {
     public static final Logger logger = LogManager.getLogger(MaLiLibReference.MOD_ID);
 
@@ -31,6 +33,12 @@ public class MaLiLib implements InitializationListener, OverlayRenderer
     public void renderOverlay()
     {
         RenderEventHandler.getInstance().onRenderGameOverlayPost(Minecraft.getInstance().getRenderPartialTicks());
+    }
+
+    @Override
+    public void clientTick(Minecraft mc)
+    {
+        TickHandler.getInstance().onClientTick(mc);
     }
 
     private static class InitHandler implements IInitializationHandler
