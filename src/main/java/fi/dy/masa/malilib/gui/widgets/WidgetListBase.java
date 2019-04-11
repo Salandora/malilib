@@ -28,6 +28,7 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
     protected int totalHeight;
     protected int browserWidth;
     protected int browserHeight;
+    protected int entryHeight;
     protected int browserEntriesStartX;
     protected int browserEntriesStartY;
     protected int browserEntriesOffsetY;
@@ -54,6 +55,11 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
         this.browserEntryHeight = 14;
 
         this.setSize(width, height);
+    }
+
+    protected void setSelectionListener(ISelectionListener<TYPE> listener)
+    {
+        this.selectionListener = listener;
     }
 
     @Override
@@ -219,6 +225,12 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
         }
 
         return false;
+    }
+
+    @Nullable
+    public WidgetSearchBar getSearchBarWidget()
+    {
+        return this.widgetSearchBar;
     }
 
     protected Collection<TYPE> getAllEntries()
@@ -534,10 +546,8 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
         this.scrollBar.setValue(0);
     }
 
-    public WidgetSearchBar getSearchBarWidget() { return widgetSearchBar; }
-
-    public void setSelectionListener(ISelectionListener<TYPE> listener)
+    public GuiScrollBar getScrollbar()
     {
-        this.selectionListener = listener;
+        return this.scrollBar;
     }
 }
