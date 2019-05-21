@@ -571,4 +571,17 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
 
         return width;
     }
+
+    public static int getMaxPrettyNameLength(List<? extends IConfigBase> configs)
+    {
+        FontRenderer font = Minecraft.getInstance().fontRenderer;
+        int width = 0;
+
+        for (IConfigBase config : configs)
+        {
+            width = Math.max(width, font.getStringWidth(config.getPrettyName()));
+        }
+
+        return width;
+    }
 }
