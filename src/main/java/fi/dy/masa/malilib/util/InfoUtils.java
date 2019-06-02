@@ -187,9 +187,9 @@ public class InfoUtils
      */
     public static void renderInGameMessages()
     {
-        MainWindow win = Minecraft.getInstance().mainWindow;
-        int x = win.getScaledWidth() / 2;
-        int y = win.getScaledHeight() - 76;
+        MainWindow window = Minecraft.getInstance().mainWindow;
+        int x = window.getScaledWidth() / 2;
+        int y = window.getScaledHeight() - 76;
 
         IN_GAME_MESSAGES.drawMessages(x, y);
     }

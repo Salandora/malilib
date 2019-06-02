@@ -9,17 +9,16 @@ import fi.dy.masa.malilib.hotkeys.KeybindMulti;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings.Context;
 import fi.dy.masa.malilib.util.KeyCodes;
-import net.minecraft.client.Minecraft;
 
 public class WidgetSearchBarConfigs extends WidgetSearchBar
 {
     protected final KeybindMulti searchKey;
     protected final ConfigButtonKeybind button;
 
-    public WidgetSearchBarConfigs(int x, int y, int width, int height, float zLevel, int searchBarOffsetX,
-            IGuiIcon iconSearch, LeftRight iconAlignment, Minecraft mc)
+    public WidgetSearchBarConfigs(int x, int y, int width, int height, int searchBarOffsetX,
+            IGuiIcon iconSearch, LeftRight iconAlignment)
     {
-        super(x, y + 3, width - 160, 14, zLevel, searchBarOffsetX, iconSearch, iconAlignment, mc);
+        super(x, y + 3, width - 160, 14, searchBarOffsetX, iconSearch, iconAlignment);
 
         KeybindSettings settings = KeybindSettings.create(Context.ANY, KeyAction.BOTH, true, true, false, false, false);
         this.searchKey = KeybindMulti.fromStorageString("", settings);
@@ -42,10 +41,10 @@ public class WidgetSearchBarConfigs extends WidgetSearchBar
     {
         if (this.searchOpen)
         {
-            if (this.button.mouseClicked(mouseX, mouseY, mouseButton))
+            if (this.button.isMouseOver(mouseX, mouseY))
             {
                 boolean selectedPre = this.button.isSelected();
-                this.button.onMouseButtonClicked(mouseButton);
+                this.button.onMouseClicked(mouseX, mouseY, mouseButton);
 
                 if (selectedPre == false)
                 {
@@ -89,7 +88,7 @@ public class WidgetSearchBarConfigs extends WidgetSearchBar
 
         if (this.searchOpen)
         {
-            this.button.render(mouseX, mouseY, 0);
+            this.button.render(mouseX, mouseY, false);
         }
     }
 }

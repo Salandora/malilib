@@ -52,11 +52,10 @@ public class WidgetConfigOption extends WidgetConfigOptionBase<ConfigOptionWrapp
     @Nullable protected ImmutableList<String> initialStringList;
     protected int colorDisplayPosX;
 
-    public WidgetConfigOption(int x, int y, int width, int height, float zLevel, int labelWidth, int configWidth,
-            ConfigOptionWrapper wrapper, int listIndex, IKeybindConfigGui host, Minecraft mc,
-            WidgetListConfigOptionsBase<?, ?> parent)
+    public WidgetConfigOption(int x, int y, int width, int height, int labelWidth, int configWidth,
+            ConfigOptionWrapper wrapper, int listIndex, IKeybindConfigGui host, WidgetListConfigOptionsBase<?, ?> parent)
     {
-        super(x, y, width, height, zLevel, mc, parent, wrapper, listIndex);
+        super(x, y, width, height, parent, wrapper, listIndex);
 
         this.host = host;
         this.wrapper = wrapper;
@@ -146,7 +145,7 @@ public class WidgetConfigOption extends WidgetConfigOptionBase<ConfigOptionWrapp
             ConfigButtonKeybind keybindButton = new ConfigButtonKeybind(x, y, configWidth, configHeight, keybind, this.host);
             x += configWidth + 4;
 
-            this.addWidget(new WidgetKeybindSettings(x, y, 20, 20, zLevel, keybind, config.getName(), this.parent, this.host.getDialogHandler()));
+            this.addWidget(new WidgetKeybindSettings(x, y, 20, 20, keybind, config.getName(), this.parent, this.host.getDialogHandler()));
             x += 25;
 
             this.addButton(keybindButton, this.host.getButtonPressListener());
@@ -243,7 +242,7 @@ public class WidgetConfigOption extends WidgetConfigOptionBase<ConfigOptionWrapp
     protected void addConfigButtonEntry(int xReset, int yReset, IConfigResettable config, ButtonBase optionButton)
     {
         ButtonGeneric resetButton = this.createResetButton(xReset, yReset, config);
-        ConfigOptionChangeListenerButton<ButtonBase> listenerChange = new ConfigOptionChangeListenerButton<>(config, resetButton, null);
+        ConfigOptionChangeListenerButton listenerChange = new ConfigOptionChangeListenerButton(config, resetButton, null);
         ConfigOptionListenerResetConfig listenerReset = new ConfigOptionListenerResetConfig(config, new ConfigResetterButton(optionButton), resetButton, null);
 
         this.addButton(optionButton, listenerChange);
@@ -282,7 +281,7 @@ public class WidgetConfigOption extends WidgetConfigOptionBase<ConfigOptionWrapp
             return;
         }
 
-        WidgetSlider slider = new WidgetSlider(x, y, configWidth, configHeight, this.zLevel, callback);
+        WidgetSlider slider = new WidgetSlider(x, y, configWidth, configHeight, callback);
         ConfigOptionListenerResetConfig listenerReset = new ConfigOptionListenerResetConfig(config, null, resetButton, null);
 
         this.addWidget(slider);
@@ -321,7 +320,7 @@ public class WidgetConfigOption extends WidgetConfigOptionBase<ConfigOptionWrapp
         }
     }
 
-    public static class ListenerSliderToggle implements IButtonActionListener<ButtonGeneric>
+    public static class ListenerSliderToggle implements IButtonActionListener
     {
         protected final IConfigSlider config;
 
@@ -331,22 +330,16 @@ public class WidgetConfigOption extends WidgetConfigOptionBase<ConfigOptionWrapp
         }
 
         @Override
-        public void actionPerformed(ButtonGeneric control)
+        public void actionPerformedWithButton(ButtonBase button, int mouseButton)
         {
             this.config.toggleUseSlider();
 
             GuiScreen gui = Minecraft.getInstance().currentScreen;
 
-            if (gui != null)
+            if (gui instanceof GuiBase)
             {
-                //gui.initGui();
+                ((GuiBase) gui).initGui();
             }
-        }
-
-        @Override
-        public void actionPerformedWithButton(ButtonGeneric control, int mouseButton)
-        {
-            this.actionPerformed(control);
         }
     }
 }

@@ -12,7 +12,6 @@ import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.gui.GuiScrollBar;
 import fi.dy.masa.malilib.gui.interfaces.ISelectionListener;
 import fi.dy.masa.malilib.util.KeyCodes;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.MathHelper;
 
@@ -48,7 +47,6 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
 
     public WidgetListBase(int x, int y, int width, int height, @Nullable ISelectionListener<TYPE> selectionListener)
     {
-        this.mc = Minecraft.getInstance();
         this.posX = x;
         this.posY = y;
         this.selectionListener = selectionListener;
@@ -132,7 +130,7 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
     }
 
     @Override
-    public boolean onMouseScrolled(int mouseX, int mouseY, int mouseWheelDelta)
+    public boolean onMouseScrolled(int mouseX, int mouseY, double mouseWheelDelta)
     {
         if (super.onMouseScrolled(mouseX, mouseY, mouseWheelDelta))
         {
@@ -184,7 +182,7 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
         }
         else if (this.allowKeyboardNavigation)
         {
-            if (keyCode == KeyCodes.KEY_UP)             this.offsetSelectionOrScrollbar(-1, true);
+                 if (keyCode == KeyCodes.KEY_UP)        this.offsetSelectionOrScrollbar(-1, true);
             else if (keyCode == KeyCodes.KEY_DOWN)      this.offsetSelectionOrScrollbar( 1, true);
             else if (keyCode == KeyCodes.KEY_PAGE_UP)   this.offsetSelectionOrScrollbar(-this.maxVisibleBrowserEntries / 2, true);
             else if (keyCode == KeyCodes.KEY_PAGE_DOWN) this.offsetSelectionOrScrollbar( this.maxVisibleBrowserEntries / 2, true);
@@ -196,6 +194,25 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
         }
 
         return false;
+    }
+
+    @Override
+    public boolean onCharTyped(char charIn, int modifiers)
+    {
+        if (this.onCharTypedSearchBar(charIn, modifiers))
+        {
+            return true;
+        }
+
+        for (WIDGET widget : this.listWidgets)
+        {
+            if (widget.onCharTyped(charIn, modifiers))
+            {
+                return true;
+            }
+        }
+
+        return super.onCharTyped(charIn, modifiers);
     }
 
     protected boolean onKeyTypedSearchBar(int keyCode, int scanCode, int modifiers)
@@ -211,17 +228,14 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
         return false;
     }
 
-    @Override
-    public boolean onCharTyped(char charIn, int modifiers) {
-        if (this.widgetSearchBar != null && this.widgetSearchBar.onCharTyped(charIn, modifiers)) {
+    protected boolean onCharTypedSearchBar(char charIn, int modifiers)
+    {
+        if (this.widgetSearchBar != null && this.widgetSearchBar.onCharTyped(charIn, modifiers))
+        {
+            this.clearSelection();
+            this.refreshBrowserEntries();
+            this.resetScrollbarPosition();
             return true;
-        }
-        else {
-            for (WIDGET widget : this.listWidgets) {
-                if (widget.onCharTyped(charIn, modifiers)) {
-                    return true;
-                }
-            }
         }
 
         return false;

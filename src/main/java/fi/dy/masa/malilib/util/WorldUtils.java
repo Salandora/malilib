@@ -3,18 +3,12 @@ package fi.dy.masa.malilib.util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 
 public class WorldUtils
 {
     public static int getDimensionId(World world)
     {
         return world.dimension.getType().getId();
-    }
-
-    public static DimensionType getDimensionType(World world)
-    {
-        return world.dimension.getType();
     }
 
     /**

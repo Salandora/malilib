@@ -1,7 +1,7 @@
 package fi.dy.masa.malilib.gui.button;
 
 import fi.dy.masa.malilib.config.IConfigBoolean;
-import net.minecraft.util.text.TextFormatting;
+import fi.dy.masa.malilib.gui.GuiBase;
 
 public class ConfigButtonBoolean extends ButtonGeneric
 {
@@ -16,12 +16,12 @@ public class ConfigButtonBoolean extends ButtonGeneric
     }
 
     @Override
-    public void onMouseButtonClicked(int mouseButton)
+    protected boolean onMouseClickedImpl(int mouseX, int mouseY, int mouseButton)
     {
         this.config.toggleBooleanValue();
         this.updateDisplayString();
 
-        super.onMouseButtonClicked(mouseButton);
+        return super.onMouseClickedImpl(mouseX, mouseY, mouseButton);
     }
 
     @Override
@@ -31,11 +31,11 @@ public class ConfigButtonBoolean extends ButtonGeneric
 
         if (this.config.getBooleanValue())
         {
-            this.displayString = TextFormatting.DARK_GREEN + valueStr + TextFormatting.RESET;
+            this.displayString = GuiBase.TXT_DARK_GREEN + valueStr + GuiBase.TXT_RST;
         }
         else
         {
-            this.displayString = TextFormatting.DARK_RED + valueStr + TextFormatting.RESET;
+            this.displayString = GuiBase.TXT_DARK_RED + valueStr + GuiBase.TXT_RST;
         }
     }
 }

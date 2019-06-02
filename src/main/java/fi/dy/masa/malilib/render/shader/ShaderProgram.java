@@ -3,10 +3,9 @@ package fi.dy.masa.malilib.render.shader;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-import fi.dy.masa.malilib.MaLiLib;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
+import fi.dy.masa.malilib.MaLiLib;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.ResourceLocation;

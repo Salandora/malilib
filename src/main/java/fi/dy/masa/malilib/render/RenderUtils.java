@@ -5,27 +5,25 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
-
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.color.BlockColors;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.util.math.MutableBoundingBox;
 import org.lwjgl.opengl.GL11;
 import fi.dy.masa.malilib.config.HudAlignment;
 import fi.dy.masa.malilib.util.Color4f;
-import net.minecraft.client.MainWindow;
 import fi.dy.masa.malilib.util.InventoryUtils;
 import fi.dy.masa.malilib.util.PositionUtils;
 import fi.dy.masa.malilib.util.PositionUtils.HitPart;
 import net.minecraft.block.BlockShulkerBox;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.color.BlockColors;
+import net.minecraft.client.renderer.model.BakedQuad;
+import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -43,6 +41,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.storage.MapData;
@@ -50,8 +49,15 @@ import net.minecraft.world.storage.MapData;
 public class RenderUtils
 {
     public static final ResourceLocation TEXTURE_MAP_BACKGROUND = new ResourceLocation("textures/map/map_background.png");
+
+    private static final Random RAND = new Random();
     //private static final Vec3d LIGHT0_POS = (new Vec3d( 0.2D, 1.0D, -0.7D)).normalize();
     //private static final Vec3d LIGHT1_POS = (new Vec3d(-0.2D, 1.0D,  0.7D)).normalize();
+
+    public static void bindTexture(ResourceLocation texture)
+    {
+        Minecraft.getInstance().getTextureManager().bindTexture(texture);
+    }
 
     public static void drawOutlinedBox(int x, int y, int width, int height, int colorBg, int colorBorder)
     {
@@ -176,7 +182,7 @@ public class RenderUtils
 
             for (String lineOrig : textLines)
             {
-                String[] lines = lineOrig.split("\\\\n");
+                String[] lines = lineOrig.split("\\n");
 
                 for (String line : lines)
                 {
@@ -274,7 +280,7 @@ public class RenderUtils
 
     public static void drawString(FontRenderer fontRendererIn, String text, int x, int y, int color)
     {
-        String[] parts = text.split("\\\\n");
+        String[] parts = text.split("\\n");
 
         for (String line : parts)
         {
@@ -734,7 +740,7 @@ public class RenderUtils
 
         GlStateManager.enableCull();
         GlStateManager.disableBlend();
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color4f(1f, 1f, 1f, 1f);
         GlStateManager.popMatrix();
     }
 
@@ -930,8 +936,8 @@ public class RenderUtils
 
             GlStateManager.pushMatrix();
             GlStateManager.disableLighting();
-            GlStateManager.color4f(1, 1, 1, 1);
-            mc.getTextureManager().bindTexture(fi.dy.masa.malilib.render.RenderUtils.TEXTURE_MAP_BACKGROUND);
+            GlStateManager.color4f(1f, 1f, 1f, 1f);
+            bindTexture(fi.dy.masa.malilib.render.RenderUtils.TEXTURE_MAP_BACKGROUND);
 
             int y1 = y - dimensions - 20;
             int y2 = y1 + dimensions;
@@ -968,7 +974,7 @@ public class RenderUtils
 
     public static void renderShulkerBoxPreview(ItemStack stack, int x, int y, boolean useBgColors)
     {
-        if (GuiScreen.isShiftKeyDown() && stack.hasTag())
+        if (stack.hasTag())
         {
             NonNullList<ItemStack> items = InventoryUtils.getStoredItems(stack, -1);
 
@@ -987,13 +993,13 @@ public class RenderUtils
             x += 8;
             y -= (props.height + 18);
 
-            if (stack.getItem() instanceof ItemBlock && ((ItemBlock)stack.getItem()).getBlock() instanceof BlockShulkerBox)
+            if (stack.getItem() instanceof ItemBlock && ((ItemBlock) stack.getItem()).getBlock() instanceof BlockShulkerBox)
             {
                 setShulkerboxBackgroundTintColor((BlockShulkerBox) ((ItemBlock) stack.getItem()).getBlock(), useBgColors);
             }
             else
             {
-                GlStateManager.color4f(1, 1, 1, 1);
+                GlStateManager.color4f(1f, 1f, 1f, 1f);
             }
 
             Minecraft mc = Minecraft.getInstance();
@@ -1027,7 +1033,7 @@ public class RenderUtils
         }
         else
         {
-            GlStateManager.color4f(1, 1, 1, 1);
+            GlStateManager.color4f(1f, 1f, 1f, 1f);
         }
     }
 
@@ -1041,20 +1047,20 @@ public class RenderUtils
         Minecraft mc = Minecraft.getInstance();
 
         GlStateManager.pushMatrix();
-        mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+        bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
         GlStateManager.enableRescaleNormal();
         GlStateManager.enableAlphaTest();
         GlStateManager.alphaFunc(516, 0.1F);
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color4f(1f, 1f, 1f, 1f);
 
         setupGuiTransform(x, y, model.isGui3d(), zLevel);
         //model.getItemCameraTransforms().applyTransform(ItemCameraTransforms.TransformType.GUI);
         GlStateManager.rotatef( 30, 1, 0, 0);
         GlStateManager.rotatef(225, 0, 1, 0);
-        GlStateManager.scaled(0.625, 0.625, 0.625);
+        GlStateManager.scalef(0.625f, 0.625f, 0.625f);
 
         renderModel(model, state);
 
@@ -1091,18 +1097,16 @@ public class RenderUtils
         {
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder bufferbuilder = tessellator.getBuffer();
-            bufferbuilder.begin(7, DefaultVertexFormats.ITEM);
-
-            Random random = new Random();
+            bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
 
             for (EnumFacing enumfacing : EnumFacing.values())
             {
-                random.setSeed(42L);
-                renderQuads(bufferbuilder, model.getQuads(state, enumfacing, random), state, color);
+                RAND.setSeed(0);
+                renderQuads(bufferbuilder, model.getQuads(state, enumfacing, RAND), state, color);
             }
 
-            random.setSeed(42L);
-            renderQuads(bufferbuilder, model.getQuads(state, null, random), state, color);
+            RAND.setSeed(0);
+            renderQuads(bufferbuilder, model.getQuads(state, null, RAND), state, color);
             tessellator.draw();
         }
 

@@ -3,17 +3,20 @@ package fi.dy.masa.malilib.gui;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
+import fi.dy.masa.malilib.gui.Message.MessageType;
+import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.gui.button.IButtonActionListener;
+import fi.dy.masa.malilib.gui.interfaces.IMessageConsumer;
+import fi.dy.masa.malilib.interfaces.ICompletionListener;
 import fi.dy.masa.malilib.interfaces.IConfirmationListener;
 import fi.dy.masa.malilib.render.RenderUtils;
 import fi.dy.masa.malilib.util.StringUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 
-public class GuiConfirmAction extends GuiDialogBase
+public class GuiConfirmAction extends GuiDialogBase implements ICompletionListener
 {
     protected final List<String> messageLines = new ArrayList<>();
     protected final IConfirmationListener listener;
@@ -21,14 +24,13 @@ public class GuiConfirmAction extends GuiDialogBase
 
     public GuiConfirmAction(int width, String titleKey, IConfirmationListener listener, @Nullable GuiScreen parent, String messageKey, Object... args)
     {
-        this.mc = Minecraft.getInstance();
         this.setParent(parent);
         this.title = I18n.format(titleKey);
         this.listener = listener;
         this.useTitleHierarchy = false;
         this.zLevel = 1f;
 
-        StringUtils.splitTextToLines(this.messageLines, I18n.format(messageKey, args), width - 30, this.mc.fontRenderer);
+        StringUtils.splitTextToLines(this.messageLines, I18n.format(messageKey, args), width - 30, this.textRenderer);
 
         this.setWidthAndHeight(width, this.getMessageHeight() + 50);
         this.centerOnScreen();
@@ -56,7 +58,7 @@ public class GuiConfirmAction extends GuiDialogBase
 
     public int getMessageHeight()
     {
-        return this.messageLines.size() * (this.mc.fontRenderer.FONT_HEIGHT + 1) - 1 + 5;
+        return this.messageLines.size() * (this.textRenderer.FONT_HEIGHT + 1) - 1 + 5;
     }
 
     protected int getButtonWidth()
@@ -65,7 +67,7 @@ public class GuiConfirmAction extends GuiDialogBase
 
         for (ButtonType type : ButtonType.values())
         {
-            width = Math.max(width, this.mc.fontRenderer.getStringWidth(type.getDisplayName()) + 10);
+            width = Math.max(width, this.getStringWidth(type.getDisplayName()) + 10);
         }
 
         return width;
@@ -94,16 +96,16 @@ public class GuiConfirmAction extends GuiDialogBase
         GlStateManager.pushMatrix();
         GlStateManager.translatef(0, 0, this.zLevel);
 
-        RenderUtils.drawOutlinedBox(this.dialogLeft, this.dialogTop, this.dialogWidth, this.dialogHeight, 0xE0000000, COLOR_HORIZONTAL_BAR);
+        RenderUtils.drawOutlinedBox(this.dialogLeft, this.dialogTop, this.dialogWidth, this.dialogHeight, 0xF0000000, COLOR_HORIZONTAL_BAR);
 
         // Draw the title
-        this.drawString(this.fontRenderer, this.getTitle(), this.dialogLeft + 10, this.dialogTop + 4, COLOR_WHITE);
+        this.drawStringWithShadow(this.getTitle(), this.dialogLeft + 10, this.dialogTop + 4, COLOR_WHITE);
         int y = this.dialogTop + 20;
 
         for (String text : this.messageLines)
         {
-            this.fontRenderer.drawString(text, this.dialogLeft + 10, y, this.textColor);
-            y += this.fontRenderer.FONT_HEIGHT + 1;
+            this.drawString(text, this.dialogLeft + 10, y, this.textColor);
+            y += this.textRenderer.FONT_HEIGHT + 1;
         }
 
         this.drawButtons(mouseX, mouseY, partialTicks);
@@ -115,7 +117,38 @@ public class GuiConfirmAction extends GuiDialogBase
         return new ButtonListener(type, this);
     }
 
-    protected static class ButtonListener implements IButtonActionListener<ButtonGeneric>
+    @Override
+    public void addMessage(MessageType type, int lifeTime, String messageKey, Object... args)
+    {
+        if (this.getParent() instanceof IMessageConsumer)
+        {
+            ((IMessageConsumer) this.getParent()).addMessage(type, lifeTime, messageKey, args);
+        }
+        else
+        {
+            super.addMessage(type, lifeTime, messageKey, args);
+        }
+    }
+
+    @Override
+    public void onTaskCompleted()
+    {
+        if (this.getParent() instanceof ICompletionListener)
+        {
+            ((ICompletionListener) this.getParent()).onTaskCompleted();
+        }
+    }
+
+    @Override
+    public void onTaskAborted()
+    {
+        if (this.getParent() instanceof ICompletionListener)
+        {
+            ((ICompletionListener) this.getParent()).onTaskAborted();
+        }
+    }
+
+    protected static class ButtonListener implements IButtonActionListener
     {
         private final GuiConfirmAction gui;
         private final ButtonType type;
@@ -127,7 +160,7 @@ public class GuiConfirmAction extends GuiDialogBase
         }
 
         @Override
-        public void actionPerformed(ButtonGeneric control)
+        public void actionPerformedWithButton(ButtonBase button, int mouseButton)
         {
             if (this.type == ButtonType.OK)
             {
@@ -139,12 +172,6 @@ public class GuiConfirmAction extends GuiDialogBase
             }
 
             this.gui.mc.displayGuiScreen(this.gui.getParent());
-        }
-
-        @Override
-        public void actionPerformedWithButton(ButtonGeneric control, int mouseButton)
-        {
-            this.actionPerformed(control);
         }
     }
 

@@ -1,5 +1,6 @@
 package fi.dy.masa.malilib.gui;
 
+import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.gui.button.IButtonActionListener;
 import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
@@ -67,8 +68,8 @@ public abstract class GuiRenderLayerEditBase extends GuiBase
         {
             String labelMin = I18n.format("malilib.gui.label.render_layers.layer_min") + ":";
             String labelMax = I18n.format("malilib.gui.label.render_layers.layer_max") + ":";
-            int w1 = GuiBase.getTextWidth(labelMin);
-            int w2 = GuiBase.getTextWidth(labelMax);
+            int w1 = this.getStringWidth(labelMin);
+            int w2 = this.getStringWidth(labelMax);
 
             this.addLabel(x, y     , w1, 20, 0xFFFFFF, labelMax);
             this.addLabel(x, y + 23, w2, 20, 0xFFFFFF, labelMin);
@@ -78,7 +79,7 @@ public abstract class GuiRenderLayerEditBase extends GuiBase
         else
         {
             String label = I18n.format("malilib.gui.label.render_layers.layer") + ":";
-            int w = GuiBase.getTextWidth(label);
+            int w = this.getStringWidth(label);
             this.addLabel(x, y, w, 20, 0xFFFFFF, label);
 
             x += w + 10;
@@ -88,7 +89,7 @@ public abstract class GuiRenderLayerEditBase extends GuiBase
 
         if (layerMode == LayerMode.LAYER_RANGE)
         {
-            this.textField2 = new GuiTextFieldInteger(x, y, width, 20, this.mc.fontRenderer);
+            this.textField2 = new GuiTextFieldInteger(x, y, width, 20, this.textRenderer);
             this.addTextField(this.textField2, new TextFieldListener(layerMode, layerRange, true));
 
             this.createHotkeyCheckBoxes(x + width + 24, y, layerRange);
@@ -101,7 +102,7 @@ public abstract class GuiRenderLayerEditBase extends GuiBase
             this.textField2 = null;
         }
 
-        this.textField1 = new GuiTextFieldInteger(x, y, width, 20, this.mc.fontRenderer);
+        this.textField1 = new GuiTextFieldInteger(x, y, width, 20, this.textRenderer);
         this.addTextField(this.textField1, new TextFieldListener(layerMode, layerRange, false));
         this.createValueAdjustButton(x + width + 3, y, false, layerRange, valueAdjustIcon);
         y += 23;
@@ -134,7 +135,7 @@ public abstract class GuiRenderLayerEditBase extends GuiBase
         this.addButton(button, listener);
     }
 
-    protected static class ButtonListenerLayerEdit implements IButtonActionListener<ButtonGeneric>
+    protected static class ButtonListenerLayerEdit implements IButtonActionListener
     {
         protected final GuiRenderLayerEditBase parent;
         protected final LayerRange layerRange;
@@ -148,12 +149,7 @@ public abstract class GuiRenderLayerEditBase extends GuiBase
         }
 
         @Override
-        public void actionPerformed(ButtonGeneric control)
-        {
-        }
-
-        @Override
-        public void actionPerformedWithButton(ButtonGeneric control, int mouseButton)
+        public void actionPerformedWithButton(ButtonBase button, int mouseButton)
         {
             if (this.type == Type.MODE)
             {
@@ -202,7 +198,7 @@ public abstract class GuiRenderLayerEditBase extends GuiBase
         }
     }
 
-    protected static class ButtonListenerChangeValue implements IButtonActionListener<ButtonGeneric>
+    protected static class ButtonListenerChangeValue implements IButtonActionListener
     {
         protected final GuiRenderLayerEditBase parent;
         protected final LayerRange layerRange;
@@ -218,12 +214,7 @@ public abstract class GuiRenderLayerEditBase extends GuiBase
         }
 
         @Override
-        public void actionPerformed(ButtonGeneric control)
-        {
-        }
-
-        @Override
-        public void actionPerformedWithButton(ButtonGeneric control, int mouseButton)
+        public void actionPerformedWithButton(ButtonBase button, int mouseButton)
         {
             int change = mouseButton == 1 ? -1 : 1;
 

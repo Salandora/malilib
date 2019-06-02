@@ -9,7 +9,6 @@ import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.gui.button.IButtonActionListener;
 import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
@@ -21,10 +20,10 @@ public class WidgetStringListEditEntry extends WidgetConfigOptionBase<String>
     protected final int listIndex;
     protected final boolean isOdd;
 
-    public WidgetStringListEditEntry(int x, int y, int width, int height, float zLevel,
-            int listIndex, boolean isOdd, String initialValue, String defaultValue, Minecraft mc, WidgetListStringListEdit parent)
+    public WidgetStringListEditEntry(int x, int y, int width, int height,
+            int listIndex, boolean isOdd, String initialValue, String defaultValue, WidgetListStringListEdit parent)
     {
-        super(x, y, width, height, zLevel, mc, parent, initialValue, listIndex);
+        super(x, y, width, height, parent, initialValue, listIndex);
 
         this.listIndex = listIndex;
         this.isOdd = isOdd;
@@ -101,10 +100,10 @@ public class WidgetStringListEditEntry extends WidgetConfigOptionBase<String>
     protected ButtonGeneric createResetButton(int x, int y, GuiTextField textField)
     {
         String labelReset = I18n.format("malilib.gui.button.reset.caps");
-        int w = this.mc.fontRenderer.getStringWidth(labelReset) + 10;
+        int w = this.getStringWidth(labelReset) + 10;
 
         ButtonGeneric resetButton = new ButtonGeneric(x, y, w, 20, labelReset);
-        resetButton.enabled = textField.getText().equals(this.defaultValue) == false;
+        resetButton.setEnabled(textField.getText().equals(this.defaultValue) == false);
 
         return resetButton;
     }
@@ -198,7 +197,7 @@ public class WidgetStringListEditEntry extends WidgetConfigOptionBase<String>
     @Override
     public void render(int mouseX, int mouseY, boolean selected)
     {
-        GlStateManager.color4f(1, 1, 1, 1);
+        GlStateManager.color4f(1f, 1f, 1f, 1f);
 
         if (this.isOdd)
         {
@@ -229,12 +228,12 @@ public class WidgetStringListEditEntry extends WidgetConfigOptionBase<String>
         @Override
         public boolean onTextChange(GuiTextField textField)
         {
-            this.buttonReset.enabled = this.textField.getText().equals(this.defaultValue) == false;
+            this.buttonReset.setEnabled(this.textField.getText().equals(this.defaultValue) == false);
             return false;
         }
     }
 
-    private static class ListenerResetConfig implements IButtonActionListener<ButtonGeneric>
+    private static class ListenerResetConfig implements IButtonActionListener
     {
         private final WidgetStringListEditEntry parent;
         private final ButtonGeneric buttonReset;
@@ -246,20 +245,14 @@ public class WidgetStringListEditEntry extends WidgetConfigOptionBase<String>
         }
 
         @Override
-        public void actionPerformed(ButtonGeneric control)
+        public void actionPerformedWithButton(ButtonBase button, int mouseButton)
         {
             this.parent.textField.getTextField().setText(this.parent.defaultValue);
-            this.buttonReset.enabled = this.parent.textField.getTextField().getText().equals(this.parent.defaultValue) == false;
-        }
-
-        @Override
-        public void actionPerformedWithButton(ButtonGeneric control, int mouseButton)
-        {
-            this.actionPerformed(control);
+            this.buttonReset.setEnabled(this.parent.textField.getTextField().getText().equals(this.parent.defaultValue) == false);
         }
     }
 
-    private static class ListenerListActions implements IButtonActionListener<ButtonGeneric>
+    private static class ListenerListActions implements IButtonActionListener
     {
         private final ButtonType type;
         private final WidgetStringListEditEntry parent;
@@ -271,7 +264,7 @@ public class WidgetStringListEditEntry extends WidgetConfigOptionBase<String>
         }
 
         @Override
-        public void actionPerformed(ButtonGeneric control)
+        public void actionPerformedWithButton(ButtonBase button, int mouseButton)
         {
             if (this.type == ButtonType.ADD)
             {
@@ -285,12 +278,6 @@ public class WidgetStringListEditEntry extends WidgetConfigOptionBase<String>
             {
                 this.parent.moveEntry(this.type == ButtonType.MOVE_DOWN);
             }
-        }
-
-        @Override
-        public void actionPerformedWithButton(ButtonGeneric control, int mouseButton)
-        {
-            this.actionPerformed(control);
         }
     }
 

@@ -2,13 +2,13 @@ package fi.dy.masa.malilib.gui;
 
 import java.util.Collection;
 import com.google.common.collect.ImmutableList;
+import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.gui.button.IButtonActionListener;
 import fi.dy.masa.malilib.gui.interfaces.IStringListConsumer;
 import fi.dy.masa.malilib.gui.widgets.WidgetListStringSelection;
 import fi.dy.masa.malilib.gui.widgets.WidgetStringListEntry;
 import fi.dy.masa.malilib.interfaces.IStringListProvider;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 
 public class GuiStringListSelection extends GuiListBase<String, WidgetStringListEntry, WidgetListStringSelection> implements IStringListProvider
@@ -67,7 +67,7 @@ public class GuiStringListSelection extends GuiListBase<String, WidgetStringList
 
         if (width == -1)
         {
-            width = this.mc.fontRenderer.getStringWidth(label) + 10;
+            width = this.getStringWidth(label) + 10;
         }
 
         ButtonGeneric button = new ButtonGeneric(x, y, width, 20, label);
@@ -76,7 +76,7 @@ public class GuiStringListSelection extends GuiListBase<String, WidgetStringList
         return width;
     }
 
-    private static class ButtonListener implements IButtonActionListener<ButtonGeneric>
+    private static class ButtonListener implements IButtonActionListener
     {
         private final GuiStringListSelection parent;
         private final Type type;
@@ -88,12 +88,7 @@ public class GuiStringListSelection extends GuiListBase<String, WidgetStringList
         }
 
         @Override
-        public void actionPerformed(ButtonGeneric control)
-        {
-        }
-
-        @Override
-        public void actionPerformedWithButton(ButtonGeneric control, int mouseButton)
+        public void actionPerformedWithButton(ButtonBase button, int mouseButton)
         {
             if (this.type == Type.OK)
             {
@@ -101,7 +96,7 @@ public class GuiStringListSelection extends GuiListBase<String, WidgetStringList
             }
             else
             {
-                Minecraft.getInstance().displayGuiScreen(this.parent.getParent());
+                this.parent.mc.displayGuiScreen(this.parent.getParent());
             }
         }
 

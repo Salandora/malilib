@@ -1,7 +1,7 @@
 package fi.dy.masa.malilib.gui.wrappers;
 
-import fi.dy.masa.malilib.util.KeyCodes;
 import fi.dy.masa.malilib.gui.interfaces.ITextFieldListener;
+import fi.dy.masa.malilib.util.KeyCodes;
 import net.minecraft.client.gui.GuiTextField;
 
 public class TextFieldWrapper<T extends GuiTextField>
@@ -79,11 +79,13 @@ public class TextFieldWrapper<T extends GuiTextField>
 
     public boolean onCharTyped(char charIn, int modifiers)
     {
+        String textPre = this.textField.getText();
+
         if (this.textField.isFocused() && this.textField.charTyped(charIn, modifiers))
         {
-            if (this.listener != null)
+            if (this.listener != null && this.textField.getText().equals(textPre) == false)
             {
-                this.listener.onTextChange(charIn, modifiers, this.textField);
+                this.listener.onTextChange(this.textField);
             }
 
             return true;

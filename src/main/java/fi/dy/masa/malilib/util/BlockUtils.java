@@ -14,7 +14,7 @@ public class BlockUtils
      * @return the first PropertyDirection, or null if there are no such properties
      */
     @Nullable
-    public static IProperty<EnumFacing> getFirstDirectionProperty(IBlockState state)
+    public static DirectionProperty getFirstDirectionProperty(IBlockState state)
     {
         for (IProperty<?> prop : state.getProperties())
         {
@@ -37,7 +37,7 @@ public class BlockUtils
     @Nullable
     public static EnumFacing getFirstPropertyFacingValue(IBlockState state)
     {
-        IProperty<EnumFacing> prop = getFirstDirectionProperty(state);
+        DirectionProperty prop = getFirstDirectionProperty(state);
         return prop != null ? state.get(prop) : null;
     }
 }

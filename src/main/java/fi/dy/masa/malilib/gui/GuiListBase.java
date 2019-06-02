@@ -115,7 +115,7 @@ public abstract class GuiListBase<TYPE, WIDGET extends WidgetListEntryBase<TYPE>
     }
 
     @Override
-    public boolean onMouseScrolled(int mouseX, int mouseY, int mouseWheelDelta)
+    public boolean onMouseScrolled(int mouseX, int mouseY, double mouseWheelDelta)
     {
         if (super.onMouseScrolled(mouseX, mouseY, mouseWheelDelta))
         {
@@ -151,12 +151,13 @@ public abstract class GuiListBase<TYPE, WIDGET extends WidgetListEntryBase<TYPE>
     @Override
     public boolean onCharTyped(char charIn, int modifiers)
     {
-        // Try to handle everything in the parent first
+        // Try to handle everything except ESC in the parent first
         if (super.onCharTyped(charIn, modifiers))
         {
             return true;
         }
-        else if (this.getListWidget() != null && this.getListWidget().onCharTyped(charIn, modifiers))
+
+        if (this.getListWidget() != null && this.getListWidget().onCharTyped(charIn, modifiers))
         {
             return true;
         }

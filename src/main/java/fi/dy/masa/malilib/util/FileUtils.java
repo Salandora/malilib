@@ -16,14 +16,14 @@ public class FileUtils
 {
     private static final Set<Character> ILLEGAL_CHARACTERS = ImmutableSet.of( '/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':' );
 
+    public static File getConfigDirectory()
+    {
+        return new File(Minecraft.getInstance().gameDir, "config");
+    }
+
     public static File getMinecraftDirectory()
     {
         return Minecraft.getInstance().gameDir;
-    }
-
-    public static File getConfigDirectory()
-    {
-        return new File(getMinecraftDirectory(), "config");
     }
 
     /**

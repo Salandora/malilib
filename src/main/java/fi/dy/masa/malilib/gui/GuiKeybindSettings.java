@@ -6,10 +6,8 @@ import com.google.common.collect.ImmutableList;
 import fi.dy.masa.malilib.config.options.ConfigBase;
 import fi.dy.masa.malilib.config.options.ConfigBoolean;
 import fi.dy.masa.malilib.config.options.ConfigOptionList;
-import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.gui.button.ConfigButtonBoolean;
 import fi.dy.masa.malilib.gui.button.ConfigButtonOptionList;
-import fi.dy.masa.malilib.gui.button.IButtonActionListener;
 import fi.dy.masa.malilib.gui.interfaces.IDialogHandler;
 import fi.dy.masa.malilib.gui.widgets.WidgetHoverInfo;
 import fi.dy.masa.malilib.hotkeys.IKeybind;
@@ -17,7 +15,6 @@ import fi.dy.masa.malilib.hotkeys.KeyAction;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings;
 import fi.dy.masa.malilib.render.RenderUtils;
 import fi.dy.masa.malilib.util.KeyCodes;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 
@@ -39,7 +36,6 @@ public class GuiKeybindSettings extends GuiDialogBase
 
     public GuiKeybindSettings(IKeybind keybind, String name, @Nullable IDialogHandler dialogHandler, GuiScreen parent)
     {
-        this.mc = Minecraft.getInstance();
         this.keybind = keybind;
         this.keybindName = name;
         this.dialogHandler = dialogHandler;
@@ -69,11 +65,11 @@ public class GuiKeybindSettings extends GuiDialogBase
         this.cfgCancel.setBooleanValue(settings.shouldCancel());
 
         this.configList = ImmutableList.of(this.cfgActivateOn, this.cfgContext, this.cfgAllowEmpty, this.cfgAllowExtra, this.cfgOrderSensitive, this.cfgExclusive, this.cfgCancel);
-        this.labelWidth = GuiBase.getMaxPrettyNameLength(this.configList);
+        this.labelWidth = this.getMaxPrettyNameLength(this.configList);
         this.configWidth = 100;
 
         int totalWidth = this.labelWidth + this.configWidth + 30;
-        totalWidth = Math.max(totalWidth, this.mc.fontRenderer.getStringWidth(this.title) + 20);
+        totalWidth = Math.max(totalWidth, this.getStringWidth(this.title) + 20);
 
         this.setWidthAndHeight(totalWidth, this.configList.size() * 22 + 30);
         this.centerOnScreen();
@@ -86,19 +82,17 @@ public class GuiKeybindSettings extends GuiDialogBase
     {
         this.clearElements();
 
-        Listener listener = new Listener(); // dummy
-
         int x = this.dialogLeft + 10;
         int y = this.dialogTop + 24;
 
         for (ConfigBase<?> config : this.configList)
         {
-            this.addConfig(x, y, this.labelWidth, this.configWidth, config, listener);
+            this.addConfig(x, y, this.labelWidth, this.configWidth, config);
             y += 22;
         }
     }
 
-    protected void addConfig(int x, int y, int labelWidth, int configWidth, ConfigBase<?> config, Listener listener)
+    protected void addConfig(int x, int y, int labelWidth, int configWidth, ConfigBase<?> config)
     {
         this.addLabel(x, y + 4, labelWidth, 10, 0xFFFFFFFF, I18n.format(config.getPrettyName()));
         this.addWidget(new WidgetHoverInfo(x, y + 2, labelWidth, 12, config.getComment()));
@@ -106,11 +100,11 @@ public class GuiKeybindSettings extends GuiDialogBase
 
         if (config instanceof ConfigBoolean)
         {
-            this.addButton(new ConfigButtonBoolean(x, y, configWidth, 20, (ConfigBoolean) config), listener);
+            this.addWidget(new ConfigButtonBoolean(x, y, configWidth, 20, (ConfigBoolean) config));
         }
         else if (config instanceof ConfigOptionList)
         {
-            this.addButton(new ConfigButtonOptionList(x, y, configWidth, 20, (ConfigOptionList) config), listener);
+            this.addWidget(new ConfigButtonOptionList(x, y, configWidth, 20, (ConfigOptionList) config));
         }
     }
 
@@ -151,7 +145,7 @@ public class GuiKeybindSettings extends GuiDialogBase
     @Override
     protected void drawTitle(int mouseX, int mouseY, float partialTicks)
     {
-        this.drawString(this.fontRenderer, this.title, this.dialogLeft + 10, this.dialogTop + 6, COLOR_WHITE);
+        this.drawStringWithShadow(this.title, this.dialogLeft + 10, this.dialogTop + 6, COLOR_WHITE);
     }
 
     @Override
@@ -171,19 +165,6 @@ public class GuiKeybindSettings extends GuiDialogBase
         else
         {
             return super.onKeyTyped(keyCode, scanCode, modifiers);
-        }
-    }
-
-    protected static class Listener implements IButtonActionListener<ButtonGeneric>
-    {
-        @Override
-        public void actionPerformed(ButtonGeneric control)
-        {
-        }
-
-        @Override
-        public void actionPerformedWithButton(ButtonGeneric control, int mouseButton)
-        {
         }
     }
 }

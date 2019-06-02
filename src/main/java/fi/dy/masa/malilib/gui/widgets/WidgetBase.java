@@ -1,42 +1,59 @@
 package fi.dy.masa.malilib.gui.widgets;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.Nullable;
-import fi.dy.masa.malilib.gui.button.ButtonBase;
-import fi.dy.masa.malilib.gui.button.IButtonActionListener;
-import fi.dy.masa.malilib.gui.wrappers.ButtonWrapper;
 import fi.dy.masa.malilib.render.RenderUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.util.ResourceLocation;
 
 public abstract class WidgetBase
 {
     protected final Minecraft mc;
-    protected final List<WidgetBase> subWidgets = new ArrayList<>();
-    protected final List<ButtonWrapper<? extends ButtonBase>> buttons = new ArrayList<>();
+    protected final FontRenderer textRenderer;
     protected int x;
     protected int y;
     protected int width;
     protected int height;
     protected float zLevel;
-    @Nullable
-    protected WidgetBase hoveredSubWidget = null;
 
-    public WidgetBase(int x, int y, int width, int height, float zLevel)
+    public WidgetBase(int x, int y, int width, int height)
     {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-        this.zLevel = zLevel;
         this.mc = Minecraft.getInstance();
+        this.textRenderer = this.mc.fontRenderer;
+    }
+
+    public int getX()
+    {
+        return this.x;
+    }
+
+    public int getY()
+    {
+        return this.y;
     }
 
     public void setPosition(int x, int y)
     {
         this.x = x;
         this.y = y;
+    }
+
+    public void setX(int x)
+    {
+        this.x = x;
+    }
+
+    public void setY(int y)
+    {
+        this.y = y;
+    }
+
+    public void setZLevel(float zLevel)
+    {
+        this.zLevel = zLevel;
     }
 
     public int getWidth()
@@ -55,57 +72,23 @@ public abstract class WidgetBase
                mouseY >= this.y && mouseY < this.y + this.height;
     }
 
-    public final boolean onMouseClicked(int mouseX, int mouseY, int mouseButton)
+    public boolean onMouseClicked(int mouseX, int mouseY, int mouseButton)
     {
-        boolean handled = false;
-
         if (this.isMouseOver(mouseX, mouseY))
         {
-            if (this.subWidgets.isEmpty() == false)
-            {
-                for (WidgetBase widget : this.subWidgets)
-                {
-                    if (widget.isMouseOver(mouseX, mouseY) && widget.onMouseClicked(mouseX, mouseY, mouseButton))
-                    {
-                        // Don't call super if the button press got handled
-                        handled = true;
-                    }
-                }
-            }
-
-            if (handled == false)
-            {
-                handled = this.onMouseClickedImpl(mouseX, mouseY, mouseButton);
-            }
-        }
-
-        return handled;
-    }
-
-    protected boolean onMouseClickedImpl(int mouseX, int mouseY, int mouseButton)
-    {
-        for (ButtonWrapper<?> entry : this.buttons)
-        {
-            if (entry.mousePressed(this.mc, mouseX, mouseY, mouseButton))
-            {
-                // Don't call super if the button press got handled
-                return true;
-            }
+            return this.onMouseClickedImpl(mouseX, mouseY, mouseButton);
         }
 
         return false;
     }
 
-    public final void onMouseReleased(int mouseX, int mouseY, int mouseButton)
+    protected boolean onMouseClickedImpl(int mouseX, int mouseY, int mouseButton)
     {
-        if (this.subWidgets.isEmpty() == false)
-        {
-            for (WidgetBase widget : this.subWidgets)
-            {
-                widget.onMouseReleased(mouseX, mouseY, mouseButton);
-            }
-        }
+        return false;
+    }
 
+    public void onMouseReleased(int mouseX, int mouseY, int mouseButton)
+    {
         this.onMouseReleasedImpl(mouseX, mouseY, mouseButton);
     }
 
@@ -113,63 +96,24 @@ public abstract class WidgetBase
     {
     }
 
-    public final boolean onMouseScrolled(int mouseX, int mouseY, int mouseWheelDelta)
+    public boolean onMouseScrolled(int mouseX, int mouseY, double mouseWheelDelta)
     {
         if (this.isMouseOver(mouseX, mouseY))
         {
-            if (this.subWidgets.isEmpty() == false)
-            {
-                for (WidgetBase widget : this.subWidgets)
-                {
-                    if (widget.onMouseScrolled(mouseX, mouseY, mouseWheelDelta))
-                    {
-                        return true;
-                    }
-                }
-            }
-
             return this.onMouseScrolledImpl(mouseX, mouseY, mouseWheelDelta);
         }
 
         return false;
     }
 
-    public boolean onMouseScrolledImpl(int mouseX, int mouseY, int mouseWheelDelta)
+    public boolean onMouseScrolledImpl(int mouseX, int mouseY, double mouseWheelDelta)
     {
-        for (ButtonWrapper<?> entry : this.buttons)
-        {
-            if (entry.onMouseScrolled(this.mc, mouseX, mouseY, mouseWheelDelta))
-            {
-                // Don't call super if the action got handled
-                return true;
-            }
-        }
-
         return false;
     }
 
-    public final boolean onKeyTyped(int keyCode, int scanCode, int modifiers)
+    public boolean onKeyTyped(int keyCode, int scanCode, int modifiers)
     {
-        boolean handled = false;
-
-        if (this.subWidgets.isEmpty() == false)
-        {
-            for (WidgetBase widget : this.subWidgets)
-            {
-                if (widget.onKeyTyped(keyCode, scanCode, modifiers))
-                {
-                    // Don't call super if the key press got handled
-                    handled = true;
-                }
-            }
-        }
-
-        if (handled == false)
-        {
-            handled = this.onKeyTypedImpl(keyCode, scanCode, modifiers);
-        }
-
-        return handled;
+        return this.onKeyTypedImpl(keyCode, scanCode, modifiers);
     }
 
     protected boolean onKeyTypedImpl(int keyCode, int scanCode, int modifiers)
@@ -177,28 +121,9 @@ public abstract class WidgetBase
         return false;
     }
 
-    public final boolean onCharTyped(char charIn, int modifiers)
+    public boolean onCharTyped(char charIn, int modifiers)
     {
-        boolean handled = false;
-
-        if (this.subWidgets.isEmpty() == false)
-        {
-            for (WidgetBase widget : this.subWidgets)
-            {
-                if (widget.onCharTyped(charIn, modifiers))
-                {
-                    // Don't call super if the key press got handled
-                    handled = true;
-                }
-            }
-        }
-
-        if (handled == false)
-        {
-            handled = this.onCharTypedImpl(charIn, modifiers);
-        }
-
-        return handled;
+        return this.onCharTypedImpl(charIn, modifiers);
     }
 
     protected boolean onCharTypedImpl(char charIn, int modifiers)
@@ -214,83 +139,31 @@ public abstract class WidgetBase
         return this.isMouseOver(mouseX, mouseY);
     }
 
-    protected void addWidget(WidgetBase widget)
+    public void bindTexture(ResourceLocation texture)
     {
-        this.subWidgets.add(widget);
+        RenderUtils.bindTexture(texture);
     }
 
-    protected <T extends ButtonBase> void addButton(T button, IButtonActionListener<T> listener)
+    public int getStringWidth(String text)
     {
-        this.buttons.add(new ButtonWrapper<>(button, listener));
+        return this.textRenderer.getStringWidth(text);
     }
 
-    protected void addLabel(int x, int y, int width, int height, int textColor, String... lines)
+    public void drawString(String text, int x, int y, int color)
     {
-        if (lines != null && lines.length >= 1)
-        {
-            Minecraft mc = Minecraft.getInstance();
+        this.textRenderer.drawString(text, x, y, color);
+    }
 
-            if (width == -1)
-            {
-                for (String line : lines)
-                {
-                    width = Math.max(width, mc.fontRenderer.getStringWidth(line));
-                }
-            }
-
-            WidgetLabel label = new WidgetLabel(x, y, width, height, this.zLevel, textColor, lines);
-            this.addWidget(label);
-        }
+    public void drawStringWithShadow(String text, int x, int y, int color)
+    {
+        this.textRenderer.drawStringWithShadow(text, x, y, color);
     }
 
     public void render(int mouseX, int mouseY, boolean selected)
     {
-        for (int i = 0; i < this.buttons.size(); ++i)
-        {
-            this.buttons.get(i).draw(this.mc, mouseX, mouseY, 0);
-        }
     }
 
     public void postRenderHovered(int mouseX, int mouseY, boolean selected)
     {
-        this.drawHoveredSubWidget(mouseX, mouseY);
-
-        for (int i = 0; i < this.buttons.size(); ++i)
-        {
-            ButtonBase button = this.buttons.get(i).getButton();
-
-            if (button.hasHoverText() && button.isMouseOver(mouseX, mouseY))
-            {
-                RenderUtils.drawHoverText(mouseX, mouseY, button.getHoverStrings());
-            }
-        }
-    }
-
-    protected void drawSubWidgets(int mouseX, int mouseY)
-    {
-        this.hoveredSubWidget = null;
-
-        if (this.subWidgets.isEmpty() == false)
-        {
-            for (WidgetBase widget : this.subWidgets)
-            {
-                widget.render(mouseX, mouseY, false);
-
-                if (widget.isMouseOver(mouseX, mouseY))
-                {
-                    this.hoveredSubWidget = widget;
-                }
-            }
-        }
-    }
-
-    protected void drawHoveredSubWidget(int mouseX, int mouseY)
-    {
-        if (this.hoveredSubWidget != null)
-        {
-            this.hoveredSubWidget.postRenderHovered(mouseX, mouseY, false);
-
-            RenderHelper.disableStandardItemLighting();
-        }
     }
 }

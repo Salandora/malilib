@@ -6,24 +6,21 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
-
-import fi.dy.masa.malilib.util.InfoUtils;
-import net.minecraft.client.MouseHelper;
 import org.lwjgl.glfw.GLFW;
 import fi.dy.masa.malilib.MaLiLib;
-import fi.dy.masa.malilib.config.MaLiLibConfigs;
-import fi.dy.masa.malilib.config.options.ConfigBoolean;
+import fi.dy.masa.malilib.MaLiLibConfigs;
+import fi.dy.masa.malilib.hotkeys.KeybindSettings.Context;
 import fi.dy.masa.malilib.util.IF3KeyStateSetter;
+import fi.dy.masa.malilib.util.InfoUtils;
 import fi.dy.masa.malilib.util.KeyCodes;
-import fi.dy.masa.malilib.util.StringUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.util.InputMappings;
+import net.minecraft.client.util.InputMappings.Input;
 
 public class KeybindMulti implements IKeybind
 {
-    public static final ConfigBoolean KEYBIND_DEBUG = new ConfigBoolean("keybindDebugging", false, "When enabled, key presses and held keys are\nprinted to the game console (and the action bar, if enabled)");
-    public static final ConfigBoolean KEYBIND_DEBUG_ACTIONBAR = new ConfigBoolean("keybindDebuggingIngame", true, "If enabled, then the messages from 'keybindDebugging'\nare also printed to the in-game action bar");
-
-    private static List<Integer> pressedKeys = new ArrayList<>();
+    private static final ArrayList<Integer> PRESSED_KEYS = new ArrayList<>();
     private static int triggeredCount;
 
     private final String defaultStorageString;
@@ -90,7 +87,7 @@ public class KeybindMulti implements IKeybind
     @Override
     public boolean updateIsPressed()
     {
-        if (this.isValid() == false ||
+        if (this.keyCodes.isEmpty() ||
             (this.settings.getContext() != KeybindSettings.Context.ANY &&
             ((this.settings.getContext() == KeybindSettings.Context.INGAME) != (Minecraft.getInstance().currentScreen == null))))
         {
@@ -101,17 +98,17 @@ public class KeybindMulti implements IKeybind
         boolean allowExtraKeys = this.settings.getAllowExtraKeys();
         boolean allowOutOfOrder = this.settings.isOrderSensitive() == false;
         boolean pressedLast = this.pressed;
-        final int sizePressed = pressedKeys.size();
+        final int sizePressed = PRESSED_KEYS.size();
         final int sizeRequired = this.keyCodes.size();
 
         if (sizePressed >= sizeRequired && (allowExtraKeys || sizePressed == sizeRequired))
         {
             int keyCodeIndex = 0;
-            this.pressed = pressedKeys.containsAll(this.keyCodes);
+            this.pressed = PRESSED_KEYS.containsAll(this.keyCodes);
 
             for (int i = 0; i < sizePressed; ++i)
             {
-                Integer keyCodeObj = pressedKeys.get(i);
+                Integer keyCodeObj = PRESSED_KEYS.get(i);
 
                 if (this.keyCodes.get(keyCodeIndex).equals(keyCodeObj))
                 {
@@ -306,13 +303,13 @@ public class KeybindMulti implements IKeybind
         this.clearKeys();
         String[] keys = str.split(",");
 
-        for (String key : keys)
+        for (String keyName : keys)
         {
-            key = key.trim();
+            keyName = keyName.trim();
 
-            if (key.isEmpty() == false)
+            if (keyName.isEmpty() == false)
             {
-                int keyCode = KeyCodes.getKeyCodeFromName(key);
+                int keyCode = KeyCodes.getKeyCodeFromName(keyName);
 
                 if (keyCode != KeyCodes.KEY_NONE)
                 {
@@ -326,6 +323,18 @@ public class KeybindMulti implements IKeybind
     public boolean matches(int keyCode)
     {
         return this.keyCodes.size() == 1 && this.keyCodes.get(0) == keyCode;
+    }
+
+    public static int getKeyCode(KeyBinding keybind)
+    {
+        Input input = InputMappings.getInputByName(keybind.getTranslationKey());
+        return input.getType() == InputMappings.Type.MOUSE ? input.getKeyCode() - 100 : input.getKeyCode();
+    }
+
+    public static boolean hotkeyMatchesKeybind(IHotkey hotkey, KeyBinding keybind)
+    {
+        int keyCode = getKeyCode(keybind);
+        return hotkey.getKeybind().matches(keyCode);
     }
 
     @Override
@@ -375,10 +384,10 @@ public class KeybindMulti implements IKeybind
     public boolean contextOverlaps(IKeybind other)
     {
         KeybindSettings settingsOther = other.getSettings();
-        KeybindSettings.Context c1 = this.settings.getContext();
-        KeybindSettings.Context c2 = settingsOther.getContext();
+        Context c1 = this.settings.getContext();
+        Context c2 = settingsOther.getContext();
 
-        if (c1 == KeybindSettings.Context.ANY || c2 == KeybindSettings.Context.ANY || c1 == c2)
+        if (c1 == Context.ANY || c2 == Context.ANY || c1 == c2)
         {
             KeyAction a1 = this.settings.getActivateOn();
             KeyAction a2 = settingsOther.getActivateOn();
@@ -422,22 +431,22 @@ public class KeybindMulti implements IKeybind
 
         if (state)
         {
-            if (pressedKeys.contains(valObj) == false)
+            if (PRESSED_KEYS.contains(valObj) == false)
             {
                 Collection<Integer> ignored = MaLiLibConfigs.Generic.IGNORED_KEYS.getKeybind().getKeys();
 
                 if (ignored.size() == 0 || ignored.contains(valObj) == false)
                 {
-                    pressedKeys.add(valObj);
+                    PRESSED_KEYS.add(valObj);
                 }
             }
         }
         else
         {
-            pressedKeys.remove(valObj);
+            PRESSED_KEYS.remove(valObj);
         }
 
-        if (KEYBIND_DEBUG.getBooleanValue())
+        if (MaLiLibConfigs.Debug.KEYBIND_DEBUG.getBooleanValue())
         {
             printKeybindDebugMessage(keyCode, scanCode, state);
         }
@@ -448,7 +457,7 @@ public class KeybindMulti implements IKeybind
      */
     public static void reCheckPressedKeys()
     {
-        Iterator<Integer> iter = pressedKeys.iterator();
+        Iterator<Integer> iter = PRESSED_KEYS.iterator();
 
         while (iter.hasNext())
         {
@@ -461,7 +470,7 @@ public class KeybindMulti implements IKeybind
         }
 
         // Clear the triggered count after all keys have been released
-        if (pressedKeys.size() == 0)
+        if (PRESSED_KEYS.size() == 0)
         {
             triggeredCount = 0;
         }
@@ -476,7 +485,7 @@ public class KeybindMulti implements IKeybind
 
         MaLiLib.logger.info(msg);
 
-        if (KEYBIND_DEBUG_ACTIONBAR.getBooleanValue())
+        if (MaLiLibConfigs.Debug.KEYBIND_DEBUG_ACTIONBAR.getBooleanValue())
         {
             InfoUtils.printActionbarMessage(msg);
         }
@@ -484,12 +493,12 @@ public class KeybindMulti implements IKeybind
 
     public static String getActiveKeysString()
     {
-        if (pressedKeys.isEmpty() == false)
+        if (PRESSED_KEYS.isEmpty() == false)
         {
             StringBuilder sb = new StringBuilder(128);
             int i = 0;
 
-            for (int key : pressedKeys)
+            for (int key : PRESSED_KEYS)
             {
                 if (i > 0)
                 {

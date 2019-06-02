@@ -4,19 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import fi.dy.masa.malilib.config.IConfigBase;
-import fi.dy.masa.malilib.event.InputEventHandler;
 import fi.dy.masa.malilib.gui.Message.MessageType;
-import fi.dy.masa.malilib.gui.button.ButtonGeneric;
+import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.IButtonActionListener;
-import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
 import fi.dy.masa.malilib.gui.interfaces.IMessageConsumer;
 import fi.dy.masa.malilib.gui.interfaces.ITextFieldListener;
 import fi.dy.masa.malilib.gui.widgets.WidgetBase;
-import fi.dy.masa.malilib.gui.widgets.WidgetCheckBox;
 import fi.dy.masa.malilib.gui.widgets.WidgetLabel;
-import fi.dy.masa.malilib.gui.wrappers.ButtonWrapper;
 import fi.dy.masa.malilib.gui.wrappers.TextFieldWrapper;
-import fi.dy.masa.malilib.hotkeys.KeybindMulti;
 import fi.dy.masa.malilib.interfaces.IStringConsumer;
 import fi.dy.masa.malilib.render.MessageRenderer;
 import fi.dy.masa.malilib.render.RenderUtils;
@@ -29,7 +24,6 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
-import org.lwjgl.glfw.GLFW;
 
 public abstract class GuiBase extends GuiScreen implements IMessageConsumer, IStringConsumer
 {
@@ -55,13 +49,16 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
     public static final int COLOR_HORIZONTAL_BAR = 0xFF999999;
     protected static final int LEFT         = 20;
     protected static final int TOP          = 10;
-    private final List<ButtonWrapper<? extends ButtonGeneric>> buttons = new ArrayList<>();
-    private final List<TextFieldWrapper<? extends GuiTextField>> textFields = new ArrayList<>();
+    protected final Minecraft mc = Minecraft.getInstance();
+    protected final FontRenderer textRenderer = Minecraft.getInstance().fontRenderer;
+    private final List<ButtonBase> buttons = new ArrayList<>();
     private final List<WidgetBase> widgets = new ArrayList<>();
+    private final List<TextFieldWrapper<? extends GuiTextField>> textFields = new ArrayList<>();
     private final MessageRenderer messageRenderer = new MessageRenderer(0xDD000000, COLOR_HORIZONTAL_BAR);
     protected WidgetBase hoveredWidget = null;
     protected String title = "";
     protected boolean useTitleHierarchy = true;
+    private int keyInputCount;
     @Nullable
     private GuiScreen parent;
 
@@ -122,7 +119,6 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
         this.drawWidgets(mouseX, mouseY);
         this.drawTextFields(mouseX, mouseY);
         this.drawButtons(mouseX, mouseY, partialTicks);
-        //super.drawScreen(mouseX, mouseY, partialTicks);
 
         this.drawContents(mouseX, mouseY, partialTicks);
 
@@ -138,7 +134,7 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
         int mouseX = (int) (this.mc.mouseHelper.getMouseX() * (double) window.getScaledWidth() / (double) window.getWidth());
         int mouseY = (int) (this.mc.mouseHelper.getMouseY() * (double) window.getScaledHeight() / (double) window.getHeight());
 
-        if (amount == 0 || this.onMouseScrolled(mouseX, mouseY, (int) amount))
+        if (amount == 0 || this.onMouseScrolled((int) mouseX, (int) mouseY, amount))
         {
             return super.mouseScrolled(amount);
         }
@@ -171,6 +167,8 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers)
     {
+        this.keyInputCount++;
+
         if (this.onKeyTyped(keyCode, scanCode, modifiers))
         {
             return true;
@@ -182,6 +180,14 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
     @Override
     public boolean charTyped(char charIn, int modifiers)
     {
+        // This is an ugly fix for the issue that the key press from the hotkey that
+        // opens a GUI would then also get into any text fields or search bars, as the
+        // charTyped() event always fires after the keyPressed() event in any case >_>
+        if (this.keyInputCount <= 0)
+        {
+            return true;
+        }
+
         if (this.onCharTyped(charIn, modifiers))
         {
             return true;
@@ -192,9 +198,9 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
 
     public boolean onMouseClicked(int mouseX, int mouseY, int mouseButton)
     {
-        for (ButtonWrapper<?> entry : this.buttons)
+        for (ButtonBase button : this.buttons)
         {
-            if (entry.mousePressed(this.mc, mouseX, mouseY, mouseButton))
+            if (button.onMouseClicked(mouseX, mouseY, mouseButton))
             {
                 // Don't call super if the button press got handled
                 return true;
@@ -238,11 +244,11 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
         return false;
     }
 
-    public boolean onMouseScrolled(int mouseX, int mouseY, int mouseWheelDelta)
+    public boolean onMouseScrolled(int mouseX, int mouseY, double mouseWheelDelta)
     {
-        for (ButtonWrapper<?> entry : this.buttons)
+        for (ButtonBase button : this.buttons)
         {
-            if (entry.onMouseScrolled(this.mc, mouseX, mouseY, mouseWheelDelta))
+            if (button.onMouseScrolled(mouseX, mouseY, mouseWheelDelta))
             {
                 // Don't call super if the button press got handled
                 return true;
@@ -251,7 +257,7 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
 
         for (WidgetBase widget : this.widgets)
         {
-            if (widget.isMouseOver(mouseX, mouseY) && widget.onMouseScrolled(mouseX, mouseY, mouseWheelDelta))
+            if (widget.onMouseScrolled(mouseX, mouseY, mouseWheelDelta))
             {
                 // Don't call super if the action got handled
                 return true;
@@ -276,13 +282,13 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
                 {
                     entry.setFocused(false);
                     selected = i;
-                    handled = true;
                 }
-                else if (entry.onKeyTyped(keyCode, scanCode, modifiers))
+                else
                 {
-                    handled = true;
+                    entry.onKeyTyped(keyCode, scanCode, modifiers);
                 }
 
+                handled = keyCode != KeyCodes.KEY_ESCAPE;
                 break;
             }
         }
@@ -302,10 +308,14 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
 
         if (handled == false)
         {
-            if (keyCode == KeyCodes.KEY_ESCAPE) {
-                if (GuiScreen.isShiftKeyDown()) {
-                    this.mc.displayGuiScreen(null);
-                } else {
+            if (keyCode == KeyCodes.KEY_ESCAPE)
+            {
+                if (GuiScreen.isShiftKeyDown())
+                {
+                    this.close();
+                }
+                else
+                {
                     this.mc.displayGuiScreen(this.parent);
                 }
 
@@ -339,18 +349,6 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
             if (entry.onCharTyped(charIn, modifiers))
             {
                 handled = true;
-            }
-        }
-
-        if (handled == false)
-        {
-            for (WidgetBase widget : this.widgets)
-            {
-                if (widget.onCharTyped(charIn, modifiers))
-                {
-                    handled = true;
-                    break;
-                }
             }
         }
 
@@ -395,12 +393,12 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
         this.mc.getTextureManager().bindTexture(texture);
     }
 
-    public <T extends ButtonGeneric> ButtonWrapper<T> addButton(T button, IButtonActionListener<T> listener)
+    public ButtonBase addButton(ButtonBase button, IButtonActionListener listener)
     {
-        ButtonWrapper<T> entry = new ButtonWrapper<>(button, listener);
-        this.buttons.add(entry);
+        button.setActionListener(listener);
+        this.buttons.add(button);
 
-        return entry;
+        return button;
     }
 
     public <T extends GuiTextField> void addTextField(T textField, @Nullable ITextFieldListener<T> listener)
@@ -422,25 +420,17 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
             {
                 for (String line : lines)
                 {
-                    width = Math.max(width, this.fontRenderer.getStringWidth(line));
+                    width = Math.max(width, this.getStringWidth(line));
                 }
             }
 
-            WidgetLabel label = new WidgetLabel(x, y, width, height, this.zLevel, textColor, lines);
+            WidgetLabel label = new WidgetLabel(x, y, width, height, textColor, lines);
             this.addWidget(label);
 
             return label;
         }
 
         return null;
-    }
-
-    public WidgetCheckBox addCheckBox(int x, int y, int width, int height, int textColor, String text,
-            IGuiIcon widgetUnchecked, IGuiIcon widgetChecked, @Nullable String hoverInfo)
-    {
-        WidgetCheckBox checkbox = new WidgetCheckBox(x, y, this.zLevel, widgetUnchecked, widgetChecked, text, this.mc, hoverInfo);
-        this.addWidget(checkbox);
-        return checkbox;
     }
 
     protected boolean removeWidget(WidgetBase widget)
@@ -484,7 +474,7 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
 
     protected void drawTitle(int mouseX, int mouseY, float partialTicks)
     {
-        this.mc.fontRenderer.drawString(this.getTitle(), LEFT, TOP, COLOR_WHITE);
+        this.drawString(this.getTitle(), LEFT, TOP, COLOR_WHITE);
     }
 
     protected void drawContents(int mouseX, int mouseY, float partialTicks)
@@ -493,9 +483,9 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
 
     protected void drawButtons(int mouseX, int mouseY, float partialTicks)
     {
-        for (ButtonWrapper<?> entry : this.buttons)
+        for (ButtonBase button : this.buttons)
         {
-            entry.draw(this.mc, mouseX, mouseY, partialTicks);
+            button.render(mouseX, mouseY, button.isMouseOver());
         }
     }
 
@@ -527,10 +517,8 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
 
     protected void drawButtonHoverTexts(int mouseX, int mouseY, float partialTicks)
     {
-        for (ButtonWrapper<? extends ButtonGeneric> entry : this.buttons)
+        for (ButtonBase button : this.buttons)
         {
-            ButtonGeneric button = entry.getButton();
-
             if (button.hasHoverText() && button.isMouseOver())
             {
                 RenderUtils.drawHoverText(mouseX, mouseY, button.getHoverStrings());
@@ -554,32 +542,28 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
         return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
     }
 
-    public static int getTextWidth(String text)
+    public int getStringWidth(String text)
     {
-        return Minecraft.getInstance().fontRenderer.getStringWidth(text);
+        return this.textRenderer.getStringWidth(text);
     }
 
-    public static int getMaxNameLength(List<? extends IConfigBase> configs)
+    public void drawString(String text, int x, int y, int color)
     {
-        FontRenderer font = Minecraft.getInstance().fontRenderer;
+        this.textRenderer.drawString(text, x, y, color);
+    }
+
+    public void drawStringWithShadow(String text, int x, int y, int color)
+    {
+        this.textRenderer.drawStringWithShadow(text, x, y, color);
+    }
+
+    public int getMaxPrettyNameLength(List<? extends IConfigBase> configs)
+    {
         int width = 0;
 
         for (IConfigBase config : configs)
         {
-            width = Math.max(width, font.getStringWidth(config.getName()));
-        }
-
-        return width;
-    }
-
-    public static int getMaxPrettyNameLength(List<? extends IConfigBase> configs)
-    {
-        FontRenderer font = Minecraft.getInstance().fontRenderer;
-        int width = 0;
-
-        for (IConfigBase config : configs)
-        {
-            width = Math.max(width, font.getStringWidth(config.getPrettyName()));
+            width = Math.max(width, this.getStringWidth(config.getPrettyName()));
         }
 
         return width;

@@ -9,10 +9,5 @@ public interface ITextFieldListener<T extends GuiTextField>
         return false;
     }
 
-    default void onTextChange(char typedChar, int keyCode, T textField)
-    {
-        this.onTextChange(textField);
-    }
-
     boolean onTextChange(T textField);
 }

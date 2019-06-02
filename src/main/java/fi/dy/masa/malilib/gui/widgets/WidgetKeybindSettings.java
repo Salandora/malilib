@@ -3,14 +3,13 @@ package fi.dy.masa.malilib.gui.widgets;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
+import fi.dy.masa.malilib.MaLiLibReference;
 import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.gui.GuiKeybindSettings;
 import fi.dy.masa.malilib.gui.interfaces.IDialogHandler;
 import fi.dy.masa.malilib.hotkeys.IKeybind;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings;
-import fi.dy.masa.malilib.reference.MaLiLibReference;
 import fi.dy.masa.malilib.render.RenderUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
@@ -26,10 +25,10 @@ public class WidgetKeybindSettings extends WidgetBase
     protected final WidgetListBase<?, ?> widgetList;
     @Nullable protected final IDialogHandler dialogHandler;
 
-    public WidgetKeybindSettings(int x, int y, int width, int height, float zLevel,
+    public WidgetKeybindSettings(int x, int y, int width, int height,
             IKeybind keybind, String keybindName, WidgetListBase<?, ?> widgetList, @Nullable IDialogHandler dialogHandler)
     {
-        super(x, y, width, height, zLevel);
+        super(x, y, width, height);
 
         this.keybind = keybind;
         this.keybindName = keybindName;
@@ -43,15 +42,13 @@ public class WidgetKeybindSettings extends WidgetBase
     {
         if (mouseButton == 0)
         {
-            Minecraft mc = Minecraft.getInstance();
-
             if (this.dialogHandler != null)
             {
-                this.dialogHandler.openDialog(new GuiKeybindSettings(this.keybind, this.keybindName, this.dialogHandler, mc.currentScreen));
+                this.dialogHandler.openDialog(new GuiKeybindSettings(this.keybind, this.keybindName, this.dialogHandler, this.mc.currentScreen));
             }
             else
             {
-                mc.displayGuiScreen(new GuiKeybindSettings(this.keybind, this.keybindName, null, mc.currentScreen));
+                this.mc.displayGuiScreen(new GuiKeybindSettings(this.keybind, this.keybindName, null, this.mc.currentScreen));
             }
 
             return true;
@@ -70,10 +67,8 @@ public class WidgetKeybindSettings extends WidgetBase
     @Override
     public void render(int mouseX, int mouseY, boolean selected)
     {
-        Minecraft mc = Minecraft.getInstance();
-
         GlStateManager.color4f(1f, 1f, 1f, 1f);
-        mc.getTextureManager().bindTexture(TEXTURE);
+        this.bindTexture(TEXTURE);
 
         int w = 18;
         int v1 = this.settings.getActivateOn().ordinal() * w;
