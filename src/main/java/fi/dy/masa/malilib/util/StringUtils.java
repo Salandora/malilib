@@ -1,5 +1,8 @@
 package fi.dy.masa.malilib.util;
 
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.registry.IRegistry;
+
 import java.io.File;
 import java.util.List;
 import java.util.Locale;
@@ -309,15 +312,15 @@ public class StringUtils
         return prefix + defaultName + suffix;
     }
 
-    public static String getStackString(net.minecraft.item.ItemStack stack)
+    public static String getStackString(ItemStack stack)
     {
         if (stack.isEmpty() == false)
         {
-            net.minecraft.util.ResourceLocation rl = net.minecraft.item.Item.REGISTRY.getNameForObject(stack.getItem());
+            net.minecraft.util.ResourceLocation rl = IRegistry.ITEM.getKey(stack.getItem());
 
             return String.format("[%s @ %d - display: %s - NBT: %s] (%s)",
-                    rl != null ? rl.toString() : "null", stack.getMetadata(), stack.getDisplayName(),
-                    stack.getTagCompound() != null ? stack.getTagCompound().toString() : "<no NBT>",
+                    rl != null ? rl.toString() : "null", stack.getDisplayName(), stack.getDisplayName(),
+                    stack.getTag() != null ? stack.getTag().toString() : "<no NBT>",
                     stack.toString());
         }
 
