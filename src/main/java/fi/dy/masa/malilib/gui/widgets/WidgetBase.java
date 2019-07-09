@@ -9,6 +9,7 @@ public abstract class WidgetBase
 {
     protected final Minecraft mc;
     protected final FontRenderer textRenderer;
+    protected final int fontHeight;
     protected int x;
     protected int y;
     protected int width;
@@ -23,6 +24,7 @@ public abstract class WidgetBase
         this.height = height;
         this.mc = Minecraft.getInstance();
         this.textRenderer = this.mc.fontRenderer;
+        this.fontHeight = this.textRenderer.FONT_HEIGHT;
     }
 
     public int getX()
@@ -64,6 +66,16 @@ public abstract class WidgetBase
     public int getHeight()
     {
         return this.height;
+    }
+
+    public void setWidth(int width)
+    {
+        this.width = width;
+    }
+
+    public void setHeight(int height)
+    {
+        this.height = height;
     }
 
     public boolean isMouseOver(int mouseX, int mouseY)
@@ -149,14 +161,24 @@ public abstract class WidgetBase
         return this.textRenderer.getStringWidth(text);
     }
 
-    public void drawString(String text, int x, int y, int color)
+    public void drawString(int x, int y, int color, String text)
     {
         this.textRenderer.drawString(text, x, y, color);
     }
 
-    public void drawStringWithShadow(String text, int x, int y, int color)
+    public void drawCenteredString(int x, int y, int color, String text)
+    {
+        this.textRenderer.drawString(text, x - this.getStringWidth(text) / 2, y, color);
+    }
+
+    public void drawStringWithShadow(int x, int y, int color, String text)
     {
         this.textRenderer.drawStringWithShadow(text, x, y, color);
+    }
+
+    public void drawCenteredStringWithShadow(int x, int y, int color, String text)
+    {
+        this.textRenderer.drawStringWithShadow(text, x - this.getStringWidth(text) / 2, y, color);
     }
 
     public void render(int mouseX, int mouseY, boolean selected)

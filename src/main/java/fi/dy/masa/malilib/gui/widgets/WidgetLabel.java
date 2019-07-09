@@ -1,11 +1,10 @@
 package fi.dy.masa.malilib.gui.widgets;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import fi.dy.masa.malilib.render.RenderUtils;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.I18n;
+import fi.dy.masa.malilib.util.StringUtils;
 
 public class WidgetLabel extends WidgetBase
 {
@@ -21,11 +20,16 @@ public class WidgetLabel extends WidgetBase
 
     public WidgetLabel(int x, int y, int width, int height, int textColor, String... text)
     {
+        this(x, y, width, height, textColor, Arrays.asList(text));
+    }
+
+    public WidgetLabel(int x, int y, int width, int height, int textColor, List<String> lines)
+    {
         super(x, y, width, height);
 
         this.textColor = textColor;
 
-        for (String str : text)
+        for (String str : lines)
         {
             this.addLine(str);
         }
@@ -33,7 +37,7 @@ public class WidgetLabel extends WidgetBase
 
     public void addLine(String key, Object... args)
     {
-        this.labels.add(I18n.format(key, args));
+        this.labels.add(StringUtils.translate(key, args));
     }
 
     public void setCentered(boolean centered)
@@ -55,11 +59,10 @@ public class WidgetLabel extends WidgetBase
     {
         if (this.visible)
         {
-            GlStateManager.enableBlend();
-            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            RenderUtils.setupBlend();
             this.drawLabelBackground();
 
-            int fontHeight = this.textRenderer.FONT_HEIGHT;
+            int fontHeight = this.fontHeight;
             int yCenter = this.y + this.height / 2 + this.borderSize / 2;
             int yTextStart = yCenter - 1 - this.labels.size() * fontHeight / 2;
 
@@ -69,11 +72,11 @@ public class WidgetLabel extends WidgetBase
 
                 if (this.centered)
                 {
-                    RenderUtils.drawCenteredString(this.textRenderer, text, this.x + this.width / 2, yTextStart + i * fontHeight, this.textColor);
+                    this.drawCenteredStringWithShadow(this.x + this.width / 2, yTextStart + i * fontHeight, this.textColor, text);
                 }
                 else
                 {
-                    this.drawStringWithShadow(text, this.x, yTextStart + i * fontHeight, this.textColor);
+                    this.drawStringWithShadow(this.x, yTextStart + i * fontHeight, this.textColor, text);
                 }
             }
         }
@@ -88,7 +91,7 @@ public class WidgetLabel extends WidgetBase
             int xStart = this.x - this.borderSize;
             int yStart = this.y - this.borderSize;
 
-            Gui.drawRect(xStart, yStart, xStart + bgWidth, yStart + bgHeight, this.backgroundColor);
+            RenderUtils.drawRect(xStart, yStart, bgWidth, bgHeight, this.backgroundColor);
 
             RenderUtils.drawHorizontalLine(xStart, yStart           , bgWidth, this.borderULColor);
             RenderUtils.drawHorizontalLine(xStart, yStart + bgHeight, bgWidth, this.borderBRColor);

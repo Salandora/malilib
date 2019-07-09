@@ -7,13 +7,9 @@ import fi.dy.masa.malilib.gui.LeftRight;
 import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
 import fi.dy.masa.malilib.render.RenderUtils;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.ResourceLocation;
 
 public class ButtonGeneric extends ButtonBase
 {
-    protected static final ResourceLocation BUTTON_TEXTURES = new ResourceLocation("minecraft", "textures/gui/widgets.png");
-
     @Nullable
     protected final IGuiIcon icon;
     protected LeftRight alignment = LeftRight.LEFT;
@@ -22,7 +18,7 @@ public class ButtonGeneric extends ButtonBase
 
     public ButtonGeneric(int x, int y, int width, boolean rightAlign, String translationKey, Object... args)
     {
-        this(x, y, width, 20, I18n.format(translationKey, args));
+        this(x, y, width, 20, fi.dy.masa.malilib.util.StringUtils.translate(translationKey, args));
 
         if (rightAlign)
         {
@@ -101,9 +97,8 @@ public class ButtonGeneric extends ButtonBase
 
             int buttonStyle = this.getTextureOffset(this.hovered);
 
-            GlStateManager.color4f(1f, 1f, 1f, 1f);
-            GlStateManager.enableBlend();
-            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            RenderUtils.color(1f, 1f, 1f, 1f);
+            RenderUtils.setupBlend();
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
             if (this.renderDefaultBackground)
@@ -140,7 +135,7 @@ public class ButtonGeneric extends ButtonBase
 
                 if (this.textCentered)
                 {
-                    RenderUtils.drawCenteredString(this.textRenderer, this.displayString, this.x + this.width / 2, y, color);
+                    this.drawCenteredStringWithShadow(this.x + this.width / 2, y, color, this.displayString);
                 }
                 else
                 {
@@ -151,7 +146,7 @@ public class ButtonGeneric extends ButtonBase
                         x += this.icon.getWidth() + 2;
                     }
 
-                    this.drawStringWithShadow(this.displayString, x, y, color);
+                    this.drawStringWithShadow(x, y, color, this.displayString);
                 }
             }
         }

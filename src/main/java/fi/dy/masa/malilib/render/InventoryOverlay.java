@@ -13,7 +13,6 @@ import net.minecraft.block.BlockShulkerBox;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -164,9 +163,9 @@ public class InventoryOverlay
         RenderUtils.drawTexturedRectBatched(x +   7, y +   7,   7,  17, 162, 108, buffer); // middle
     }
 
-    public static void renderEquipmentOverlayBackground(Minecraft mc, int x, int y, EntityLivingBase entity)
+    public static void renderEquipmentOverlayBackground(int x, int y, EntityLivingBase entity)
     {
-        GlStateManager.color4f(1, 1, 1, 1);
+        RenderUtils.color(1f, 1f, 1f, 1f);
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
@@ -195,7 +194,7 @@ public class InventoryOverlay
         if (entity.getItemStackFromSlot(EntityEquipmentSlot.OFFHAND).isEmpty())
         {
             String texture = "minecraft:item/empty_armor_slot_shield";
-            RenderUtils.renderSprite(mc, x + 28 + 1, y + 3 * 18 + 7 + 1, texture, 16, 16);
+            RenderUtils.renderSprite(x + 28 + 1, y + 3 * 18 + 7 + 1, 16, 16, texture);
         }
 
         for (int i = 0, xOff = 7, yOff = 7; i < 4; ++i, yOff += 18)
@@ -205,7 +204,7 @@ public class InventoryOverlay
             if (entity.getItemStackFromSlot(eqSlot).isEmpty())
             {
                 String texture = EMPTY_SLOT_TEXTURES[eqSlot.getIndex()];
-                RenderUtils.renderSprite(mc, x + xOff + 1, y + yOff + 1, texture, 16, 16);
+                RenderUtils.renderSprite(x + xOff + 1, y + yOff + 1, 16, 16, texture);
             }
         }
     }
@@ -474,9 +473,7 @@ public class InventoryOverlay
         GlStateManager.scalef(scale, scale, 1);
         GlStateManager.disableLighting();
 
-        //Gui.drawRect(0, 0, 16, 16, 0x20FFFFFF); // light background for the item
-
-        RenderHelper.enableGUIStandardItemLighting();
+        RenderUtils.enableGuiItemLighting();
 
         mc.getItemRenderer().zLevel += 100;
         mc.getItemRenderer().renderItemAndEffectIntoGUI(mc.player, stack, 0, 0);
@@ -484,7 +481,7 @@ public class InventoryOverlay
         mc.getItemRenderer().zLevel -= 100;
 
         //GlStateManager.disableBlend();
-        RenderHelper.disableStandardItemLighting();
+        RenderUtils.disableItemLighting();
         GlStateManager.popMatrix();
     }
 

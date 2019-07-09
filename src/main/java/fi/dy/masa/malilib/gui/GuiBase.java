@@ -1,6 +1,7 @@
 package fi.dy.masa.malilib.gui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
 import fi.dy.masa.malilib.config.IConfigBase;
@@ -15,45 +16,55 @@ import fi.dy.masa.malilib.gui.wrappers.TextFieldWrapper;
 import fi.dy.masa.malilib.interfaces.IStringConsumer;
 import fi.dy.masa.malilib.render.MessageRenderer;
 import fi.dy.masa.malilib.render.RenderUtils;
+import fi.dy.masa.malilib.util.InputUtils;
 import fi.dy.masa.malilib.util.KeyCodes;
-import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 
 public abstract class GuiBase extends GuiScreen implements IMessageConsumer, IStringConsumer
 {
     public static final String TXT_AQUA = TextFormatting.AQUA.toString();
+    public static final String TXT_BLACK = TextFormatting.BLACK.toString();
     public static final String TXT_BLUE = TextFormatting.BLUE.toString();
+    public static final String TXT_GOLD = TextFormatting.GOLD.toString();
     public static final String TXT_GRAY = TextFormatting.GRAY.toString();
     public static final String TXT_GREEN = TextFormatting.GREEN.toString();
-    public static final String TXT_GOLD = TextFormatting.GOLD.toString();
     public static final String TXT_RED = TextFormatting.RED.toString();
     public static final String TXT_WHITE = TextFormatting.WHITE.toString();
     public static final String TXT_YELLOW = TextFormatting.YELLOW.toString();
-    public static final String TXT_BOLD = TextFormatting.BOLD.toString();
-    public static final String TXT_RST = TextFormatting.RESET.toString();
 
+    public static final String TXT_BOLD = TextFormatting.BOLD.toString();
+    public static final String TXT_ITALIC = TextFormatting.ITALIC.toString();
+    public static final String TXT_RST = TextFormatting.RESET.toString();
+    public static final String TXT_STRIKETHROUGH = TextFormatting.STRIKETHROUGH.toString();
+    public static final String TXT_UNDERLINE = TextFormatting.UNDERLINE.toString();
+
+    public static final String TXT_DARK_AQUA = TextFormatting.DARK_AQUA.toString();
+    public static final String TXT_DARK_BLUE = TextFormatting.DARK_BLUE.toString();
+    public static final String TXT_DARK_GRAY = TextFormatting.DARK_GRAY.toString();
     public static final String TXT_DARK_GREEN = TextFormatting.DARK_GREEN.toString();
+    public static final String TXT_DARK_PURPLE = TextFormatting.DARK_PURPLE.toString();
     public static final String TXT_DARK_RED = TextFormatting.DARK_RED.toString();
 
-    protected static final String BUTTON_LABEL_ADD = TextFormatting.DARK_GREEN + "+" + TextFormatting.RESET;
-    protected static final String BUTTON_LABEL_REMOVE = TextFormatting.DARK_RED + "-" + TextFormatting.RESET;
+    public static final String TXT_LIGHT_PURPLE = TextFormatting.LIGHT_PURPLE.toString();
+
+    protected static final String BUTTON_LABEL_ADD = TXT_DARK_GREEN + "+" + TXT_RST;
+    protected static final String BUTTON_LABEL_REMOVE = TXT_DARK_RED + "-" + TXT_RST;
 
     public static final int COLOR_WHITE          = 0xFFFFFFFF;
     public static final int TOOLTIP_BACKGROUND   = 0xB0000000;
     public static final int COLOR_HORIZONTAL_BAR = 0xFF999999;
     protected static final int LEFT         = 20;
     protected static final int TOP          = 10;
-    protected final Minecraft mc = Minecraft.getInstance();
-    protected final FontRenderer textRenderer = Minecraft.getInstance().fontRenderer;
+    public final Minecraft mc = Minecraft.getInstance();
+    public final FontRenderer textRenderer = this.mc.fontRenderer;
+    public final int fontHeight = this.textRenderer.FONT_HEIGHT;
     private final List<ButtonBase> buttons = new ArrayList<>();
     private final List<WidgetBase> widgets = new ArrayList<>();
-    private final List<TextFieldWrapper<? extends GuiTextField>> textFields = new ArrayList<>();
+    private final List<TextFieldWrapper<? extends GuiTextFieldGeneric>> textFields = new ArrayList<>();
     private final MessageRenderer messageRenderer = new MessageRenderer(0xDD000000, COLOR_HORIZONTAL_BAR);
     protected WidgetBase hoveredWidget = null;
     protected String title = "";
@@ -109,6 +120,18 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
         this.clearElements();
     }
 
+    protected void closeGui(boolean showParent)
+    {
+        if (showParent)
+        {
+            this.mc.displayGuiScreen(this.parent);
+        }
+        else
+        {
+            this.close();
+        }
+    }
+
     @Override
     public void render(int mouseX, int mouseY, float partialTicks)
     {
@@ -130,9 +153,8 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
     @Override
     public boolean mouseScrolled(double amount)
     {
-        MainWindow window = this.mc.mainWindow;
-        int mouseX = (int) (this.mc.mouseHelper.getMouseX() * (double) window.getScaledWidth() / (double) window.getWidth());
-        int mouseY = (int) (this.mc.mouseHelper.getMouseY() * (double) window.getScaledHeight() / (double) window.getHeight());
+        int mouseX = InputUtils.getMouseX();
+        int mouseY = InputUtils.getMouseY();
 
         if (amount == 0 || this.onMouseScrolled((int) mouseX, (int) mouseY, amount))
         {
@@ -310,14 +332,7 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
         {
             if (keyCode == KeyCodes.KEY_ESCAPE)
             {
-                if (GuiScreen.isShiftKeyDown())
-                {
-                    this.close();
-                }
-                else
-                {
-                    this.mc.displayGuiScreen(this.parent);
-                }
+                this.closeGui(isShiftDown() == false);
 
                 return true;
             }
@@ -325,7 +340,7 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
 
         if (selected >= 0)
         {
-            if (GuiScreen.isShiftKeyDown())
+            if (isShiftDown())
             {
                 selected = selected > 0 ? selected - 1 : this.textFields.size() - 1;
             }
@@ -407,28 +422,34 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
         this.mc.getTextureManager().bindTexture(texture);
     }
 
-    public ButtonBase addButton(ButtonBase button, IButtonActionListener listener)
+    public <T extends ButtonBase> T addButton(T button, IButtonActionListener listener)
     {
         button.setActionListener(listener);
         this.buttons.add(button);
-
         return button;
     }
 
-    public <T extends GuiTextField> void addTextField(T textField, @Nullable ITextFieldListener<T> listener)
+    public <T extends GuiTextFieldGeneric> TextFieldWrapper<T> addTextField(T textField, @Nullable ITextFieldListener<T> listener)
     {
-        this.textFields.add(new TextFieldWrapper<>(textField, listener));
+        TextFieldWrapper<T> wrapper = new TextFieldWrapper<>(textField, listener);
+        this.textFields.add(wrapper);
+        return wrapper;
     }
 
-    public void addWidget(WidgetBase widget)
+    public <T extends WidgetBase> T addWidget(T widget)
     {
         this.widgets.add(widget);
+        return widget;
     }
 
-    @Nullable
     public WidgetLabel addLabel(int x, int y, int width, int height, int textColor, String... lines)
     {
-        if (lines != null && lines.length >= 1)
+        return this.addLabel(x, y, width, height, textColor, Arrays.asList(lines));
+    }
+
+    public WidgetLabel addLabel(int x, int y, int width, int height, int textColor, List<String> lines)
+    {
+        if (lines.size() > 0)
         {
             if (width == -1)
             {
@@ -437,14 +458,9 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
                     width = Math.max(width, this.getStringWidth(line));
                 }
             }
-
-            WidgetLabel label = new WidgetLabel(x, y, width, height, textColor, lines);
-            this.addWidget(label);
-
-            return label;
         }
 
-        return null;
+        return this.addWidget(new WidgetLabel(x, y, width, height, textColor, lines));
     }
 
     protected boolean removeWidget(WidgetBase widget)
@@ -539,7 +555,7 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
             }
         }
 
-        RenderHelper.disableStandardItemLighting();
+        RenderUtils.disableItemLighting();
     }
 
     protected void drawHoveredWidget(int mouseX, int mouseY)
@@ -547,7 +563,7 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
         if (this.hoveredWidget != null)
         {
             this.hoveredWidget.postRenderHovered(mouseX, mouseY, false);
-            RenderHelper.disableStandardItemLighting();
+            RenderUtils.disableItemLighting();
         }
     }
 
@@ -581,5 +597,25 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
         }
 
         return width;
+    }
+
+    public static void openGui(GuiScreen gui)
+    {
+        Minecraft.getInstance().displayGuiScreen(gui);
+    }
+
+    public static boolean isShiftDown()
+    {
+        return isShiftKeyDown();
+    }
+
+    public static boolean isCtrlDown()
+    {
+        return isCtrlKeyDown();
+    }
+
+    public static boolean isAltDown()
+    {
+        return isAltKeyDown();
     }
 }
