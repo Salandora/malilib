@@ -4,7 +4,7 @@ import java.awt.Color;
 import javax.annotation.Nullable;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
-import fi.dy.masa.malilib.config.IConfigInteger;
+import fi.dy.masa.malilib.config.options.IConfigInteger;
 import fi.dy.masa.malilib.gui.interfaces.IDialogHandler;
 import fi.dy.masa.malilib.gui.interfaces.ITextFieldListener;
 import fi.dy.masa.malilib.render.RenderUtils;

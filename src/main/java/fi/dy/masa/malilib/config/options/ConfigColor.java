@@ -70,7 +70,7 @@ public class ConfigColor extends ConfigInteger
     }
 
     @Override
-    public void setValueFromJsonElement(JsonElement element)
+    public void setValueFromJsonElement(JsonElement element, String configName)
     {
         try
         {
@@ -81,13 +81,15 @@ public class ConfigColor extends ConfigInteger
             }
             else
             {
-                MaLiLib.logger.warn("Failed to set config value for '{}' from the JSON element '{}'", this.getName(), element);
+                MaLiLib.logger.warn("Failed to set config value for '{}' from the JSON element '{}'", configName, element);
             }
         }
         catch (Exception e)
         {
-            MaLiLib.logger.warn("Failed to set config value for '{}' from the JSON element '{}'", this.getName(), element, e);
+            MaLiLib.logger.warn("Failed to set config value for '{}' from the JSON element '{}'", configName, element, e);
         }
+
+        this.cacheSavedValue();
     }
 
     @Override

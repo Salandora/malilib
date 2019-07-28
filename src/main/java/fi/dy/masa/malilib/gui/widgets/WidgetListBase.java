@@ -8,8 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
+import fi.dy.masa.malilib.MaLiLibIcons;
 import fi.dy.masa.malilib.gui.GuiBase;
-import fi.dy.masa.malilib.gui.GuiScrollBar;
+import fi.dy.masa.malilib.gui.WidgetScrollBar;
 import fi.dy.masa.malilib.gui.interfaces.ISelectionListener;
 import fi.dy.masa.malilib.render.RenderUtils;
 import fi.dy.masa.malilib.util.KeyCodes;
@@ -20,7 +21,7 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
 {
     protected final List<TYPE> listContents = new ArrayList<>();
     protected final List<WIDGET> listWidgets = new ArrayList<>();
-    protected final GuiScrollBar scrollBar = new GuiScrollBar();
+    protected final WidgetScrollBar scrollBar;
     protected final Set<TYPE> selectedEntries = new HashSet<>();
     protected final int posX;
     protected final int posY;
@@ -53,6 +54,10 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
         this.selectionListener = selectionListener;
         this.browserEntryHeight = 14;
 
+        // The positions gets updated in setSize()
+        this.scrollBar = new WidgetScrollBar(0, 0, 8, height);
+        this.scrollBar.setArrowTextures(MaLiLibIcons.SMALL_ARROW_UP, MaLiLibIcons.SMALL_ARROW_DOWN);
+
         this.setSize(width, height);
     }
 
@@ -66,19 +71,15 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
     {
         super.initGui();
 
-        this.mc.keyboardListener.enableRepeatEvents(true);
+        this.addWidget(this.scrollBar);
         this.refreshEntries();
+
+        this.mc.keyboardListener.enableRepeatEvents(true);
     }
 
     @Override
     public boolean onMouseClicked(int mouseX, int mouseY, int mouseButton)
     {
-        if (mouseButton == 0 && this.scrollBar.wasMouseOver())
-        {
-            this.scrollBar.setIsDragging(true);
-            return true;
-        }
-
         if (this.onMouseClickedSearchBar(mouseX, mouseY, mouseButton))
         {
             return true;
@@ -117,11 +118,6 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
     @Override
     public boolean onMouseReleased(int mouseX, int mouseY, int mouseButton)
     {
-        if (mouseButton == 0)
-        {
-            this.scrollBar.setIsDragging(false);
-        }
-
         for (int i = 0; i < this.listWidgets.size(); ++i)
         {
             this.listWidgets.get(i).onMouseReleased(mouseX, mouseY, mouseButton);
@@ -185,8 +181,8 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
         {
                  if (keyCode == KeyCodes.KEY_UP)        this.offsetSelectionOrScrollbar(-1, true);
             else if (keyCode == KeyCodes.KEY_DOWN)      this.offsetSelectionOrScrollbar( 1, true);
-            else if (keyCode == KeyCodes.KEY_PAGE_UP)   this.offsetSelectionOrScrollbar(-this.maxVisibleBrowserEntries / 2, true);
-            else if (keyCode == KeyCodes.KEY_PAGE_DOWN) this.offsetSelectionOrScrollbar( this.maxVisibleBrowserEntries / 2, true);
+            else if (keyCode == KeyCodes.KEY_PRIOR)     this.offsetSelectionOrScrollbar(-this.maxVisibleBrowserEntries / 2, true);
+            else if (keyCode == KeyCodes.KEY_NEXT)      this.offsetSelectionOrScrollbar( this.maxVisibleBrowserEntries / 2, true);
             else if (keyCode == KeyCodes.KEY_HOME)      this.offsetSelectionOrScrollbar(-this.listContents.size(), true);
             else if (keyCode == KeyCodes.KEY_END)       this.offsetSelectionOrScrollbar( this.listContents.size(), true);
             else return false;
@@ -250,6 +246,11 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
     protected boolean hasFilter()
     {
         return this.widgetSearchBar != null && this.widgetSearchBar.hasFilter();
+    }
+
+    public boolean isSearchOpen()
+    {
+        return this.widgetSearchBar != null && this.widgetSearchBar.isSearchOpen();
     }
 
     @Nullable
@@ -389,7 +390,7 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
 
         WidgetBase hovered = null;
         boolean hoveredSelected = false;
-        int scrollbarHeight = this.browserHeight - this.browserEntriesOffsetY - 8;
+        int scrollbarHeight = this.browserHeight - this.browserEntriesOffsetY - 6;
         int totalHeight = 0;
 
         for (int i = 0; i < this.listContents.size(); ++i)
@@ -399,9 +400,7 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
 
         totalHeight = Math.max(totalHeight, scrollbarHeight);
 
-        int scrollBarX = this.posX + this.browserWidth - 9;
-        int scrollBarY = this.browserEntriesStartY + this.browserEntriesOffsetY;
-        this.scrollBar.render(mouseX, mouseY, partialTicks, scrollBarX, scrollBarY, 8, scrollbarHeight, totalHeight);
+        this.scrollBar.render(mouseX, mouseY, scrollbarHeight, totalHeight);
 
         // The value gets updated in the drawScrollBar() method above, if dragging
         if (this.scrollBar.getValue() != this.lastScrollbarPosition)
@@ -450,6 +449,17 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
         this.browserEntriesStartX = this.posX + this.browserPaddingX;
         this.browserEntriesStartY = this.posY + this.browserPaddingY;
         this.browserEntryWidth = this.browserWidth - 14;
+
+        this.updateScrollbarPosition();
+    }
+
+    protected void updateScrollbarPosition()
+    {
+        int scrollBarX = this.posX + this.browserWidth - 9;
+        int scrollBarY = this.browserEntriesStartY + this.browserEntriesOffsetY;
+
+        this.scrollBar.setPosition(scrollBarX, scrollBarY);
+        this.scrollBar.setHeight(this.browserHeight - this.browserEntriesOffsetY);
     }
 
     protected int getBrowserEntryHeightFor(@Nullable TYPE type)
@@ -629,7 +639,7 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
         this.scrollBar.setValue(0);
     }
 
-    public GuiScrollBar getScrollbar()
+    public WidgetScrollBar getScrollbar()
     {
         return this.scrollBar;
     }

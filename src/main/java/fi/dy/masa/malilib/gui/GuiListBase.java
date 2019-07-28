@@ -63,10 +63,24 @@ public abstract class GuiListBase<TYPE, WIDGET extends WidgetListEntryBase<TYPE>
         this.widget = this.createListWidget(this.listX, this.listY);
     }
 
+    public boolean isSearchOpen()
+    {
+        return this.getListWidget().isSearchOpen();
+    }
+
     @Override
     public GuiBase setParent(GuiScreen parent)
     {
         return super.setParent(parent);
+    }
+
+    protected void updateListPosition(int listX, int listY)
+    {
+        int scrollbarPosition = this.getListWidget().getScrollbar().getValue();
+        this.setListPosition(listX, listY);
+        this.reCreateListWidget();
+        this.getListWidget().getScrollbar().setValue(scrollbarPosition);
+        this.getListWidget().refreshEntries();
     }
 
     @Override

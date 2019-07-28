@@ -4,12 +4,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import fi.dy.masa.malilib.MaLiLib;
 import fi.dy.masa.malilib.config.ConfigType;
-import fi.dy.masa.malilib.config.IConfigBoolean;
 
 public class ConfigBoolean extends ConfigBase<ConfigBoolean> implements IConfigBoolean
 {
     private final boolean defaultValue;
     private boolean value;
+    private boolean lastSavedValue;
 
     public ConfigBoolean(String name, boolean defaultValue, String comment)
     {
@@ -22,6 +22,8 @@ public class ConfigBoolean extends ConfigBase<ConfigBoolean> implements IConfigB
 
         this.defaultValue = defaultValue;
         this.value = defaultValue;
+
+        this.cacheSavedValue();
     }
 
     @Override
@@ -61,6 +63,18 @@ public class ConfigBoolean extends ConfigBase<ConfigBoolean> implements IConfigB
     }
 
     @Override
+    public boolean isDirty()
+    {
+        return this.lastSavedValue != this.value;
+    }
+
+    @Override
+    public void cacheSavedValue()
+    {
+        this.lastSavedValue = this.value;
+    }
+
+    @Override
     public void resetToDefault()
     {
         this.value = this.defaultValue;
@@ -85,7 +99,7 @@ public class ConfigBoolean extends ConfigBase<ConfigBoolean> implements IConfigB
     }
 
     @Override
-    public void setValueFromJsonElement(JsonElement element)
+    public void setValueFromJsonElement(JsonElement element, String configName)
     {
         try
         {
@@ -95,13 +109,15 @@ public class ConfigBoolean extends ConfigBase<ConfigBoolean> implements IConfigB
             }
             else
             {
-                MaLiLib.logger.warn("Failed to set config value for '{}' from the JSON element '{}'", this.getName(), element);
+                MaLiLib.logger.warn("Failed to set config value for '{}' from the JSON element '{}'", configName, element);
             }
         }
         catch (Exception e)
         {
-            MaLiLib.logger.warn("Failed to set config value for '{}' from the JSON element '{}'", this.getName(), element, e);
+            MaLiLib.logger.warn("Failed to set config value for '{}' from the JSON element '{}'", configName, element, e);
         }
+
+        this.cacheSavedValue();
     }
 
     @Override

@@ -5,15 +5,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
+import fi.dy.masa.malilib.MaLiLibIcons;
 import fi.dy.masa.malilib.config.ConfigType;
-import fi.dy.masa.malilib.config.IConfigBase;
+import fi.dy.masa.malilib.config.options.IConfigBase;
 import fi.dy.masa.malilib.gui.GuiConfigsBase;
 import fi.dy.masa.malilib.gui.GuiConfigsBase.ConfigOptionWrapper;
-import fi.dy.masa.malilib.gui.LeftRight;
-import fi.dy.masa.malilib.gui.MaLiLibIcons;
 import fi.dy.masa.malilib.hotkeys.IHotkey;
 import fi.dy.masa.malilib.hotkeys.IKeybind;
 import fi.dy.masa.malilib.util.AlphaNumComparator;
+import fi.dy.masa.malilib.util.HorizontalAlignment;
 
 public class WidgetListConfigOptions extends WidgetListConfigOptionsBase<ConfigOptionWrapper, WidgetConfigOption>
 {
@@ -28,14 +28,14 @@ public class WidgetListConfigOptions extends WidgetListConfigOptionsBase<ConfigO
 
         if (useKeybindSearch)
         {
-            this.widgetSearchConfigs = new WidgetSearchBarConfigs(x + 2, y + 4, width - 14, 20, 0, MaLiLibIcons.SEARCH, LeftRight.LEFT);
+            this.widgetSearchConfigs = new WidgetSearchBarConfigs(x + 2, y + 4, width - 14, 20, 0, MaLiLibIcons.SEARCH, HorizontalAlignment.LEFT);
             this.widgetSearchBar = this.widgetSearchConfigs;
             this.browserEntriesOffsetY = 23;
         }
         else
         {
             this.widgetSearchConfigs = null;
-            this.widgetSearchBar = new WidgetSearchBar(x + 2, y + 4, width - 14, 14, 0, MaLiLibIcons.SEARCH, LeftRight.LEFT);
+            this.widgetSearchBar = new WidgetSearchBar(x + 2, y + 4, width - 14, 14, 0, MaLiLibIcons.SEARCH, HorizontalAlignment.LEFT);
             this.browserEntriesOffsetY = 17;
         }
     }
@@ -76,7 +76,8 @@ public class WidgetListConfigOptions extends WidgetListConfigOptionsBase<ConfigO
 
             for (ConfigOptionWrapper entry : entries)
             {
-                if ((filterText.isEmpty() || this.entryMatchesFilter(entry, filterText)) &&
+                if (entry.getType() == ConfigOptionWrapper.Type.CONFIG &&
+                    (filterText.isEmpty() || this.entryMatchesFilter(entry, filterText)) &&
                     (entry.getConfig().getType() != ConfigType.HOTKEY ||
                      filterKeys.getKeys().size() == 0 ||
                      ((IHotkey) entry.getConfig()).getKeybind().overlaps(filterKeys)))
@@ -124,6 +125,16 @@ public class WidgetListConfigOptions extends WidgetListConfigOptionsBase<ConfigO
         @Override
         public int compare(ConfigOptionWrapper config1, ConfigOptionWrapper config2)
         {
+            if (config1.getType() != ConfigOptionWrapper.Type.CONFIG)
+            {
+                return 1;
+            }
+
+            if (config2.getType() != ConfigOptionWrapper.Type.CONFIG)
+            {
+                return -1;
+            }
+
             return this.compare(config1.getConfig().getName(), config2.getConfig().getName());
         }
     }

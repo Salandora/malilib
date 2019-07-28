@@ -1,9 +1,10 @@
-package fi.dy.masa.malilib.config;
+package fi.dy.masa.malilib.config.options;
 
 import javax.annotation.Nullable;
 import com.google.gson.JsonElement;
+import fi.dy.masa.malilib.config.ConfigType;
 
-public interface IConfigBase
+public interface IConfigBase extends IConfigSavable
 {
     /**
      * Returns the type of this config. Used by the config GUI to determine what kind of control
@@ -48,8 +49,9 @@ public interface IConfigBase
     /**
      * Set the value of this config option from a JSON element (is possible)
      * @param element
+     * @param configName
      */
-    void setValueFromJsonElement(JsonElement element);
+    void setValueFromJsonElement(JsonElement element, String configName);
 
     /**
      * Return the value of this config option as a JSON element, for saving into a config file.

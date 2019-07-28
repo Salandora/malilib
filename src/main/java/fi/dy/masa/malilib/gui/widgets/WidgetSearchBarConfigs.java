@@ -1,6 +1,5 @@
 package fi.dy.masa.malilib.gui.widgets;
 
-import fi.dy.masa.malilib.gui.LeftRight;
 import fi.dy.masa.malilib.gui.button.ConfigButtonKeybind;
 import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
 import fi.dy.masa.malilib.hotkeys.IKeybind;
@@ -8,6 +7,7 @@ import fi.dy.masa.malilib.hotkeys.KeyAction;
 import fi.dy.masa.malilib.hotkeys.KeybindMulti;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings.Context;
+import fi.dy.masa.malilib.util.HorizontalAlignment;
 import fi.dy.masa.malilib.util.KeyCodes;
 
 public class WidgetSearchBarConfigs extends WidgetSearchBar
@@ -16,7 +16,7 @@ public class WidgetSearchBarConfigs extends WidgetSearchBar
     protected final ConfigButtonKeybind button;
 
     public WidgetSearchBarConfigs(int x, int y, int width, int height, int searchBarOffsetX,
-            IGuiIcon iconSearch, LeftRight iconAlignment)
+            IGuiIcon iconSearch, HorizontalAlignment iconAlignment)
     {
         super(x, y + 3, width - 160, 14, searchBarOffsetX, iconSearch, iconAlignment);
 

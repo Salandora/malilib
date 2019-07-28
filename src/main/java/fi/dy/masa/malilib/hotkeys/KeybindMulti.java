@@ -8,12 +8,18 @@ import java.util.List;
 import javax.annotation.Nullable;
 import org.lwjgl.glfw.GLFW;
 import fi.dy.masa.malilib.MaLiLib;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import fi.dy.masa.malilib.IMinecraftAccessor;
+import fi.dy.masa.malilib.LiteModMaLiLib;
 import fi.dy.masa.malilib.MaLiLibConfigs;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings.Context;
 import fi.dy.masa.malilib.util.GuiUtils;
 import fi.dy.masa.malilib.util.IF3KeyStateSetter;
 import fi.dy.masa.malilib.util.InfoUtils;
 import fi.dy.masa.malilib.util.KeyCodes;
+import fi.dy.masa.malilib.util.JsonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
@@ -21,13 +27,15 @@ import net.minecraft.client.util.InputMappings.Input;
 
 public class KeybindMulti implements IKeybind
 {
-    private static final ArrayList<Integer> PRESSED_KEYS = new ArrayList<>();
+    private static List<Integer> pressedKeys = new ArrayList<>();
     private static int triggeredCount;
 
     private final String defaultStorageString;
     private final KeybindSettings defaultSettings;
     private List<Integer> keyCodes = new ArrayList<>(4);
     private KeybindSettings settings;
+    private String lastSavedStorageString;
+    private KeybindSettings lastSavedSettings;
     private boolean pressed;
     private boolean pressedLast;
     private int heldTime;
@@ -39,6 +47,8 @@ public class KeybindMulti implements IKeybind
         this.defaultStorageString = defaultStorageString;
         this.defaultSettings = settings;
         this.settings = settings;
+
+        this.cacheSavedValue();
     }
 
     @Override
@@ -99,17 +109,17 @@ public class KeybindMulti implements IKeybind
         boolean allowExtraKeys = this.settings.getAllowExtraKeys();
         boolean allowOutOfOrder = this.settings.isOrderSensitive() == false;
         boolean pressedLast = this.pressed;
-        final int sizePressed = PRESSED_KEYS.size();
+        final int sizePressed = pressedKeys.size();
         final int sizeRequired = this.keyCodes.size();
 
         if (sizePressed >= sizeRequired && (allowExtraKeys || sizePressed == sizeRequired))
         {
             int keyCodeIndex = 0;
-            this.pressed = PRESSED_KEYS.containsAll(this.keyCodes);
+            this.pressed = pressedKeys.containsAll(this.keyCodes);
 
             for (int i = 0; i < sizePressed; ++i)
             {
-                Integer keyCodeObj = PRESSED_KEYS.get(i);
+                Integer keyCodeObj = pressedKeys.get(i);
 
                 if (this.keyCodes.get(keyCodeIndex).equals(keyCodeObj))
                 {
@@ -251,6 +261,20 @@ public class KeybindMulti implements IKeybind
     }
 
     @Override
+    public boolean isDirty()
+    {
+        return this.lastSavedStorageString.equals(this.getStringValue()) == false ||
+               this.lastSavedSettings.equals(this.settings) == false;
+    }
+
+    @Override
+    public void cacheSavedValue()
+    {
+        this.lastSavedStorageString = this.getStringValue();
+        this.lastSavedSettings = this.settings;
+    }
+
+    @Override
     public void resetToDefault()
     {
         this.setValueFromString(this.defaultStorageString);
@@ -304,13 +328,13 @@ public class KeybindMulti implements IKeybind
         this.clearKeys();
         String[] keys = str.split(",");
 
-        for (String keyName : keys)
+        for (String key : keys)
         {
-            keyName = keyName.trim();
+            key = key.trim();
 
-            if (keyName.isEmpty() == false)
+            if (key.isEmpty() == false)
             {
-                int keyCode = KeyCodes.getKeyCodeFromName(keyName);
+                int keyCode = KeyCodes.getKeyCodeFromName(key);
 
                 if (keyCode != KeyCodes.KEY_NONE)
                 {
@@ -402,6 +426,54 @@ public class KeybindMulti implements IKeybind
         return false;
     }
 
+    @Override
+    public void setValueFromJsonElement(JsonElement element, String hotkeyName)
+    {
+        try
+        {
+            if (element.isJsonObject())
+            {
+                JsonObject obj = element.getAsJsonObject();
+
+                if (JsonUtils.hasString(obj, "keys"))
+                {
+                    this.setValueFromString(obj.get("keys").getAsString());
+                }
+
+                if (JsonUtils.hasObject(obj, "settings"))
+                {
+                    this.setSettings(KeybindSettings.fromJson(obj.getAsJsonObject("settings")));
+                }
+            }
+            // Backwards compatibility with some old hotkeys
+            else if (element.isJsonPrimitive())
+            {
+                this.setValueFromString(element.getAsString());
+            }
+            else
+            {
+                LiteModMaLiLib.logger.warn("Failed to set the hotkey '{}' from the JSON element '{}'", hotkeyName, element);
+            }
+        }
+        catch (Exception e)
+        {
+            LiteModMaLiLib.logger.warn("Failed to set the hotkey '{}' from the JSON element '{}'", hotkeyName, element, e);
+        }
+
+        this.cacheSavedValue();
+    }
+
+    @Override
+    public JsonElement getAsJsonElement()
+    {
+        String str = this.getStringValue();
+
+        JsonObject obj = new JsonObject();
+        obj.add("keys", new JsonPrimitive(str));
+        obj.add("settings", this.getSettings().toJson());
+        return obj;
+    }
+
     public static KeybindMulti fromStorageString(String str, KeybindSettings settings)
     {
         KeybindMulti keybind = new KeybindMulti(str, settings);
@@ -432,19 +504,19 @@ public class KeybindMulti implements IKeybind
 
         if (state)
         {
-            if (PRESSED_KEYS.contains(valObj) == false)
+            if (pressedKeys.contains(valObj) == false)
             {
                 Collection<Integer> ignored = MaLiLibConfigs.Generic.IGNORED_KEYS.getKeybind().getKeys();
 
                 if (ignored.size() == 0 || ignored.contains(valObj) == false)
                 {
-                    PRESSED_KEYS.add(valObj);
+                    pressedKeys.add(valObj);
                 }
             }
         }
         else
         {
-            PRESSED_KEYS.remove(valObj);
+            pressedKeys.remove(valObj);
         }
 
         if (MaLiLibConfigs.Debug.KEYBIND_DEBUG.getBooleanValue())
@@ -458,7 +530,7 @@ public class KeybindMulti implements IKeybind
      */
     public static void reCheckPressedKeys()
     {
-        Iterator<Integer> iter = PRESSED_KEYS.iterator();
+        Iterator<Integer> iter = pressedKeys.iterator();
 
         while (iter.hasNext())
         {
@@ -471,7 +543,7 @@ public class KeybindMulti implements IKeybind
         }
 
         // Clear the triggered count after all keys have been released
-        if (PRESSED_KEYS.size() == 0)
+        if (pressedKeys.size() == 0)
         {
             triggeredCount = 0;
         }
@@ -494,12 +566,12 @@ public class KeybindMulti implements IKeybind
 
     public static String getActiveKeysString()
     {
-        if (PRESSED_KEYS.isEmpty() == false)
+        if (pressedKeys.isEmpty() == false)
         {
             StringBuilder sb = new StringBuilder(128);
             int i = 0;
 
-            for (int key : PRESSED_KEYS)
+            for (int key : pressedKeys)
             {
                 if (i > 0)
                 {

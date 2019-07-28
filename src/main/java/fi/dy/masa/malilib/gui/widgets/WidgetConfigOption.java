@@ -2,30 +2,23 @@ package fi.dy.masa.malilib.gui.widgets;
 
 import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
+import fi.dy.masa.malilib.MaLiLibIcons;
 import fi.dy.masa.malilib.config.ConfigType;
-import fi.dy.masa.malilib.config.IConfigBase;
-import fi.dy.masa.malilib.config.IConfigBoolean;
-import fi.dy.masa.malilib.config.IConfigDouble;
-import fi.dy.masa.malilib.config.IConfigInteger;
-import fi.dy.masa.malilib.config.IConfigOptionList;
-import fi.dy.masa.malilib.config.IConfigResettable;
-import fi.dy.masa.malilib.config.IConfigSlider;
-import fi.dy.masa.malilib.config.IConfigStringList;
-import fi.dy.masa.malilib.config.IConfigValue;
-import fi.dy.masa.malilib.config.IStringRepresentable;
-import fi.dy.masa.malilib.config.gui.ConfigOptionChangeListenerButton;
-import fi.dy.masa.malilib.config.gui.ConfigOptionChangeListenerKeybind;
-import fi.dy.masa.malilib.config.gui.ConfigOptionChangeListenerTextField;
-import fi.dy.masa.malilib.config.gui.ConfigOptionListenerResetConfig;
-import fi.dy.masa.malilib.config.gui.ConfigOptionListenerResetConfig.ConfigResetterButton;
-import fi.dy.masa.malilib.config.gui.ConfigOptionListenerResetConfig.ConfigResetterTextField;
 import fi.dy.masa.malilib.config.gui.SliderCallbackDouble;
 import fi.dy.masa.malilib.config.gui.SliderCallbackInteger;
 import fi.dy.masa.malilib.config.options.ConfigColor;
-import fi.dy.masa.malilib.gui.GuiBase;
+import fi.dy.masa.malilib.config.options.IConfigBase;
+import fi.dy.masa.malilib.config.options.IConfigBoolean;
+import fi.dy.masa.malilib.config.options.IConfigDouble;
+import fi.dy.masa.malilib.config.options.IConfigInteger;
+import fi.dy.masa.malilib.config.options.IConfigOptionList;
+import fi.dy.masa.malilib.config.options.IConfigResettable;
+import fi.dy.masa.malilib.config.options.IConfigSlider;
+import fi.dy.masa.malilib.config.options.IConfigStringList;
+import fi.dy.masa.malilib.config.options.IConfigValue;
+import fi.dy.masa.malilib.config.options.IStringRepresentable;
 import fi.dy.masa.malilib.gui.GuiConfigsBase.ConfigOptionWrapper;
 import fi.dy.masa.malilib.gui.GuiTextFieldGeneric;
-import fi.dy.masa.malilib.gui.MaLiLibIcons;
 import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.gui.button.ConfigButtonBoolean;
@@ -37,6 +30,12 @@ import fi.dy.masa.malilib.gui.interfaces.IConfigInfoProvider;
 import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
 import fi.dy.masa.malilib.gui.interfaces.IKeybindConfigGui;
 import fi.dy.masa.malilib.gui.interfaces.ISliderCallback;
+import fi.dy.masa.malilib.gui.listener.ConfigOptionChangeListenerButton;
+import fi.dy.masa.malilib.gui.listener.ConfigOptionChangeListenerKeybind;
+import fi.dy.masa.malilib.gui.listener.ConfigOptionChangeListenerTextField;
+import fi.dy.masa.malilib.gui.listener.ConfigOptionListenerResetConfig;
+import fi.dy.masa.malilib.gui.listener.ConfigOptionListenerResetConfig.ConfigResetterButton;
+import fi.dy.masa.malilib.gui.listener.ConfigOptionListenerResetConfig.ConfigResetterTextField;
 import fi.dy.masa.malilib.hotkeys.IHotkey;
 import fi.dy.masa.malilib.hotkeys.IKeybind;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings;
@@ -64,7 +63,7 @@ public class WidgetConfigOption extends WidgetConfigOptionBase<ConfigOptionWrapp
         {
             IConfigBase config = wrapper.getConfig();
 
-            if (wrapper.getConfig() instanceof IStringRepresentable)
+            if (config instanceof IStringRepresentable)
             {
                 IStringRepresentable configStr = (IStringRepresentable) config;
                 this.initialStringValue = configStr.getStringValue();
@@ -77,13 +76,13 @@ public class WidgetConfigOption extends WidgetConfigOptionBase<ConfigOptionWrapp
                 this.lastAppliedValue = null;
                 this.initialKeybindSettings = null;
 
-                if (wrapper.getConfig() instanceof IConfigStringList)
+                if (config instanceof IConfigStringList)
                 {
-                    this.initialStringList = ImmutableList.copyOf(((IConfigStringList) wrapper.getConfig()).getStrings());
+                    this.initialStringList = ImmutableList.copyOf(((IConfigStringList) config).getStrings());
                 }
             }
 
-            this.addConfigOption(x, y, zLevel, labelWidth, configWidth, config);
+            this.addConfigOption(x, y, zLevel, labelWidth, configWidth, wrapper);
         }
         else
         {
@@ -95,8 +94,9 @@ public class WidgetConfigOption extends WidgetConfigOptionBase<ConfigOptionWrapp
         }
     }
 
-    protected void addConfigOption(int x, int y, float zLevel, int labelWidth, int configWidth, IConfigBase config)
+    protected void addConfigOption(int x, int y, float zLevel, int labelWidth, int configWidth, ConfigOptionWrapper wrapper)
     {
+        IConfigBase config = wrapper.getConfig();
         ConfigType type = config.getType();
 
         y += 1;
@@ -109,7 +109,7 @@ public class WidgetConfigOption extends WidgetConfigOptionBase<ConfigOptionWrapp
 
         if (infoProvider != null)
         {
-            comment = infoProvider.getHoverInfo(config);
+            comment = infoProvider.getHoverInfo(wrapper);
         }
         else
         {

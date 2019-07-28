@@ -4,12 +4,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import fi.dy.masa.malilib.MaLiLib;
 import fi.dy.masa.malilib.config.ConfigType;
-import fi.dy.masa.malilib.config.IConfigValue;
 
 public class ConfigString extends ConfigBase<ConfigString> implements IConfigValue
 {
     private final String defaultValue;
     private String value;
+    private String lastSavedValue;
 
     public ConfigString(String name, String defaultValue, String comment)
     {
@@ -17,6 +17,8 @@ public class ConfigString extends ConfigBase<ConfigString> implements IConfigVal
 
         this.defaultValue = defaultValue;
         this.value = defaultValue;
+
+        this.cacheSavedValue();
     }
 
     @Override
@@ -62,7 +64,19 @@ public class ConfigString extends ConfigBase<ConfigString> implements IConfigVal
     }
 
     @Override
-    public void setValueFromJsonElement(JsonElement element)
+    public boolean isDirty()
+    {
+        return this.lastSavedValue != this.value;
+    }
+
+    @Override
+    public void cacheSavedValue()
+    {
+        this.lastSavedValue = this.value;
+    }
+
+    @Override
+    public void setValueFromJsonElement(JsonElement element, String configName)
     {
         try
         {
@@ -72,13 +86,15 @@ public class ConfigString extends ConfigBase<ConfigString> implements IConfigVal
             }
             else
             {
-                MaLiLib.logger.warn("Failed to set config value for '{}' from the JSON element '{}'", this.getName(), element);
+                MaLiLib.logger.warn("Failed to set config value for '{}' from the JSON element '{}'", configName, element);
             }
         }
         catch (Exception e)
         {
-            MaLiLib.logger.warn("Failed to set config value for '{}' from the JSON element '{}'", this.getName(), element, e);
+            MaLiLib.logger.warn("Failed to set config value for '{}' from the JSON element '{}'", configName, element, e);
         }
+
+        this.cacheSavedValue();
     }
 
     @Override

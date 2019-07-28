@@ -1,3 +1,4 @@
+/*
 package fi.dy.masa.malilib.gui;
 
 import javax.annotation.Nullable;
@@ -123,3 +124,4 @@ public class GuiScrollBar
         }
     }
 }
+*/
