@@ -16,6 +16,21 @@ public class FileUtils
 {
     private static final Set<Character> ILLEGAL_CHARACTERS = ImmutableSet.of( '/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':' );
 
+    public static boolean doesFilenameContainIllegalCharacters(String name)
+    {
+        for (int i = 0; i < name.length(); ++i)
+        {
+            char c = name.charAt(i);
+
+            if (ILLEGAL_CHARACTERS.contains(c))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static File getConfigDirectory()
     {
         return new File(Minecraft.getInstance().gameDir, "config");

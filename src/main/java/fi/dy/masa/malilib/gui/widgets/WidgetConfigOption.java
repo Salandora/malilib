@@ -17,6 +17,7 @@ import fi.dy.masa.malilib.config.options.IConfigSlider;
 import fi.dy.masa.malilib.config.options.IConfigStringList;
 import fi.dy.masa.malilib.config.options.IConfigValue;
 import fi.dy.masa.malilib.config.options.IStringRepresentable;
+import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.gui.GuiConfigsBase.ConfigOptionWrapper;
 import fi.dy.masa.malilib.gui.GuiTextFieldGeneric;
 import fi.dy.masa.malilib.gui.button.ButtonBase;

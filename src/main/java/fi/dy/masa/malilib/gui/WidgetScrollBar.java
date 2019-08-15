@@ -12,7 +12,7 @@ public class WidgetScrollBar extends WidgetBase
     @Nullable protected final IGuiIcon barTexture;
     @Nullable protected IGuiIcon arrowTextureUp;
     @Nullable protected IGuiIcon arrowTextureDown;
-    protected final Minecraft mc = Minecraft.getMinecraft();
+    protected final Minecraft mc = Minecraft.getInstance();
     protected boolean mouseOver = false;
     protected boolean dragging = false;
     protected boolean renderScrollbarBackground = true;

@@ -1,7 +1,6 @@
 package fi.dy.masa.malilib.gui.widgets;
 
 import javax.annotation.Nullable;
-import fi.dy.masa.malilib.config.IConfigResettable;
 import fi.dy.masa.malilib.config.options.IConfigResettable;
 import fi.dy.masa.malilib.gui.GuiTextFieldGeneric;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;

@@ -9,12 +9,42 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.TextComponentTranslation;
 
+import static fi.dy.masa.malilib.util.InfoType.MESSAGE_OVERLAY;
+
 public class InfoUtils
 {
     private static final MessageRenderer IN_GAME_MESSAGES = new MessageRenderer(0xA0000000, 0).setBackgroundStyle(true, false).setCentered(true, false).setExpandUp(true);
 
     public static final IStringConsumer INFO_MESSAGE_CONSUMER = new InfoMessageConsumer();
     public static final IMessageConsumer INGAME_MESSAGE_CONSUMER = new InGameMessageConsumer();
+
+
+    public static void showMessage(InfoType infoType, MessageType messageType, String translationKey, Object... args)
+    {
+        showMessage(infoType, messageType, 5000, translationKey, args);
+    }
+
+    public static void showMessage(InfoType infoType, MessageType messageType, int lifeTime, String translationKey, Object... args)
+    {
+        switch (infoType)
+        {
+            case MESSAGE_OVERLAY:
+            {
+                showGuiMessage(messageType, lifeTime, translationKey, args);
+                break;
+            }
+            case INGAME_MESSAGE:
+            {
+                showGuiOrInGameMessage(messageType, lifeTime, translationKey, args);
+                break;
+            }
+            case ACTION_BAR:
+            {
+                showGuiOrActionBarMessage(messageType, lifeTime, translationKey, args);
+                break;
+            }
+        }
+    }
 
     /**
      * Adds the message to the current GUI's message handler, if there is currently
