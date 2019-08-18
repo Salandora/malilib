@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.Deque;
 import javax.annotation.Nullable;
 import com.google.common.collect.Queues;
+import fi.dy.masa.malilib.util.GuiUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import fi.dy.masa.malilib.config.values.HudAlignment;
 import fi.dy.masa.malilib.gui.widgets.WidgetToast;
@@ -23,7 +24,7 @@ public class ToastRenderer
 
     protected ToastRenderer()
     {
-        this.mc = Minecraft.getMinecraft();
+        this.mc = Minecraft.getInstance();
 
         for (int i = 0; i < HudAlignment.values().length; ++i)
         {
@@ -67,7 +68,6 @@ public class ToastRenderer
     {
         if (this.mc.gameSettings.hideGUI == false)
         {
-            ScaledResolution res = new ScaledResolution(this.mc);
             RenderHelper.disableStandardItemLighting();
 
             for (HudAlignment alignment : HudAlignment.values())
@@ -76,12 +76,12 @@ public class ToastRenderer
 
                 if (list.isEmpty() == false)
                 {
-                    int y = this.getBaseY(alignment, res, list);
+                    int y = this.getBaseY(alignment, list);
 
                     for (int i = 0; i < list.size(); ++i)
                     {
                         ToastInstance instance = list.get(i);
-                        y += instance.render(res, y);
+                        y += instance.render(y);
 
                         if (instance.hasExpired())
                         {
@@ -105,7 +105,7 @@ public class ToastRenderer
         }
     }
 
-    protected int getBaseY(HudAlignment alignment, ScaledResolution res, ArrayList<ToastInstance> toasts)
+    protected int getBaseY(HudAlignment alignment, ArrayList<ToastInstance> toasts)
     {
         switch (alignment)
         {
@@ -114,9 +114,9 @@ public class ToastRenderer
                 return 0;
             case BOTTOM_LEFT:
             case BOTTOM_RIGHT:
-                return res.getScaledHeight() - this.getTotalToastHeight(toasts);
+                return GuiUtils.getScaledWindowHeight() - this.getTotalToastHeight(toasts);
             case CENTER:
-                return res.getScaledHeight() / 2 - this.getTotalToastHeight(toasts) / 2;
+                return GuiUtils.getScaledWindowHeight() / 2 - this.getTotalToastHeight(toasts) / 2;
             default:
         }
 
@@ -174,12 +174,11 @@ public class ToastRenderer
         }
 
         /**
-         * 
-         * @param res
+         *
          * @param y
          * @return the height of the rendered toast, which is used to calculate the next toast's position
          */
-        public int render(ScaledResolution res, int y)
+        public int render(int y)
         {
             int x = 0;
             int width = this.toast.getWidth();
@@ -190,10 +189,10 @@ public class ToastRenderer
             {
                 case TOP_RIGHT:
                 case BOTTOM_RIGHT:
-                    x = res.getScaledWidth() - this.toast.getWidth();
+                    x = GuiUtils.getScaledWindowWidth() - this.toast.getWidth();
                     break;
                 case CENTER:
-                    x = res.getScaledWidth() / 2 - this.toast.getWidth() / 2;
+                    x = GuiUtils.getScaledWindowWidth() / 2 - this.toast.getWidth() / 2;
                     break;
                 case TOP_LEFT:
                 case BOTTOM_LEFT:
@@ -202,7 +201,7 @@ public class ToastRenderer
                 default:
             }
 
-            long currentTime = Minecraft.getSystemTime();
+            long currentTime = Util.nanoTime();
             this.currentTime = currentTime;
 
             if (this.animationStartTime == -1L)
@@ -216,7 +215,7 @@ public class ToastRenderer
             }
 
             GlStateManager.pushMatrix();
-            GlStateManager.translate((float) animationOffset * (1.0F - this.getVisibility(currentTime)), 0, 500F);
+            GlStateManager.translatef((float) animationOffset * (1.0F - this.getVisibility(currentTime)), 0, 500F);
 
             this.toast.setPosition(x, y);
             this.toast.render(x, y);
