@@ -9,8 +9,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.TextComponentTranslation;
 
-import static fi.dy.masa.malilib.util.InfoType.MESSAGE_OVERLAY;
-
 public class InfoUtils
 {
     private static final MessageRenderer IN_GAME_MESSAGES = new MessageRenderer(0xA0000000, 0).setBackgroundStyle(true, false).setCentered(true, false).setExpandUp(true);
@@ -18,30 +16,26 @@ public class InfoUtils
     public static final IStringConsumer INFO_MESSAGE_CONSUMER = new InfoMessageConsumer();
     public static final IMessageConsumer INGAME_MESSAGE_CONSUMER = new InGameMessageConsumer();
 
-
-    public static void showMessage(InfoType infoType, MessageType messageType, String translationKey, Object... args)
+    public static void showMessage(InfoType outputType, MessageType messageType, String translationKey, Object... args)
     {
-        showMessage(infoType, messageType, 5000, translationKey, args);
+        showMessage(outputType, messageType, 5000, translationKey, args);
     }
 
-    public static void showMessage(InfoType infoType, MessageType messageType, int lifeTime, String translationKey, Object... args)
+    public static void showMessage(InfoType outputType, MessageType messageType, int lifeTime, String translationKey, Object... args)
     {
-        switch (infoType)
+        if (outputType != InfoType.NONE)
         {
-            case MESSAGE_OVERLAY:
-            {
-                showGuiMessage(messageType, lifeTime, translationKey, args);
-                break;
-            }
-            case INGAME_MESSAGE:
+            if (outputType == InfoType.MESSAGE_OVERLAY)
             {
                 showGuiOrInGameMessage(messageType, lifeTime, translationKey, args);
-                break;
             }
-            case ACTION_BAR:
+            else if (outputType == InfoType.HOTBAR)
             {
-                showGuiOrActionBarMessage(messageType, lifeTime, translationKey, args);
-                break;
+                printActionbarMessage(translationKey, args);
+            }
+            else if (outputType == InfoType.CHAT)
+            {
+                Minecraft.getInstance().ingameGUI.addChatMessage(ChatType.CHAT, new TextComponentTranslation(translationKey, args));
             }
         }
     }

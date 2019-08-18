@@ -16,21 +16,6 @@ public class FileUtils
 {
     private static final Set<Character> ILLEGAL_CHARACTERS = ImmutableSet.of( '/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':' );
 
-    public static boolean doesFilenameContainIllegalCharacters(String name)
-    {
-        for (int i = 0; i < name.length(); ++i)
-        {
-            char c = name.charAt(i);
-
-            if (ILLEGAL_CHARACTERS.contains(c))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public static File getConfigDirectory()
     {
         return new File(Minecraft.getInstance().gameDir, "config");
@@ -146,6 +131,27 @@ public class FileUtils
 
         // Some weird reserved windows keywords apparently... FFS >_>
         return sb.toString().replaceAll("COM", "").replaceAll("PRN", "");
+    }
+
+    /**
+     * Checks if the given filename contains characters or strings that would be invalid in file names.
+     * Most of these are just invalid on Windows...
+     * @param filename
+     * @return
+     */
+    public static boolean doesFilenameContainIllegalCharacters(String filename)
+    {
+        for (int i = 0; i < filename.length(); ++i)
+        {
+            char c = filename.charAt(i);
+
+            if (ILLEGAL_CHARACTERS.contains(c))
+            {
+                return true;
+            }
+        }
+
+        return filename.indexOf("COM") != -1 || filename.indexOf("PRN") != -1;
     }
 
     @Nullable

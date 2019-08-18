@@ -4,17 +4,18 @@ import fi.dy.masa.malilib.config.IConfigOptionListEntry;
 
 public enum InfoType implements IConfigOptionListEntry
 {
-    MESSAGE_OVERLAY ( "message_overlay", "malilib.label.infotype.message_overlay"),
-    INGAME_MESSAGE  ("ingame_message", "malilib.label.infotype.ingame_message"),
-    ACTION_BAR      ( "action_bar", "malilib.label.infotype.action_bar");
+    NONE            ("none",    "malilib.label.info_type.none"),
+    CHAT            ("chat",    "malilib.label.info_type.chat"),
+    HOTBAR          ("hotbar",  "malilib.label.info_type.hotbar"),
+    MESSAGE_OVERLAY ("message", "malilib.label.info_type.message");
 
     private final String configString;
-    private final String unlocName;
+    private final String translationKey;
 
-    private InfoType(String configString, String unlocName)
+    private InfoType(String configString, String translationKey)
     {
         this.configString = configString;
-        this.unlocName = unlocName;
+        this.translationKey = translationKey;
     }
 
     @Override
@@ -26,7 +27,7 @@ public enum InfoType implements IConfigOptionListEntry
     @Override
     public String getDisplayName()
     {
-        return StringUtils.translate(this.unlocName);
+        return StringUtils.translate(this.translationKey);
     }
 
     @Override
@@ -60,11 +61,11 @@ public enum InfoType implements IConfigOptionListEntry
 
     public static InfoType fromStringStatic(String name)
     {
-        for (InfoType infoType : InfoType.values())
+        for (InfoType aligment : InfoType.values())
         {
-            if (infoType.configString.equalsIgnoreCase(name))
+            if (aligment.configString.equalsIgnoreCase(name))
             {
-                return infoType;
+                return aligment;
             }
         }
 
