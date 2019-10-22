@@ -149,14 +149,14 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
 
     protected boolean onMouseClickedSearchBar(int mouseX, int mouseY, int mouseButton)
     {
-        if (this.widgetSearchBar != null)
+        if (this.getSearchBarWidget() != null)
         {
-            boolean searchOpenPre = this.widgetSearchBar.isSearchOpen();
+            boolean searchOpenPre = this.getSearchBarWidget().isSearchOpen();
 
-            if (this.widgetSearchBar.onMouseClickedImpl(mouseX, mouseY, mouseButton))
+            if (this.getSearchBarWidget().onMouseClickedImpl(mouseX, mouseY, mouseButton))
             {
                 // Toggled the search bar on or off
-                if (this.widgetSearchBar.isSearchOpen() != searchOpenPre)
+                if (this.getSearchBarWidget().isSearchOpen() != searchOpenPre)
                 {
                     this.clearSelection();
                     this.refreshBrowserEntries();
@@ -227,7 +227,7 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
 
     protected boolean onCharTypedSearchBar(char charIn, int modifiers)
     {
-        if (this.widgetSearchBar != null && this.widgetSearchBar.onCharTyped(charIn, modifiers))
+        if (this.getSearchBarWidget() != null && this.getSearchBarWidget().onKeyTyped(charIn, modifiers))
         {
             this.clearSelection();
             this.refreshBrowserEntries();
@@ -245,12 +245,12 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
 
     protected boolean hasFilter()
     {
-        return this.widgetSearchBar != null && this.widgetSearchBar.hasFilter();
+        return this.getSearchBarWidget() != null && this.getSearchBarWidget().hasFilter();
     }
 
     public boolean isSearchOpen()
     {
-        return this.widgetSearchBar != null && this.widgetSearchBar.isSearchOpen();
+        return this.getSearchBarWidget() != null && this.getSearchBarWidget().isSearchOpen();
     }
 
     @Nullable
@@ -269,6 +269,7 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
         return Collections.emptyList();
     }
 
+    @Nullable
     protected Comparator<TYPE> getComparator()
     {
         return null;
@@ -291,7 +292,12 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
 
         if (this.getShouldSortList())
         {
-            Collections.sort(this.listContents, this.getComparator());
+            Comparator<TYPE> comparator = this.getComparator();
+
+            if (comparator != null)
+            {
+                Collections.sort(this.listContents, comparator);
+            }
         }
 
         this.reCreateListEntryWidgets();
@@ -304,7 +310,7 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
 
     protected String getFilterText()
     {
-        return this.widgetSearchBar != null ? this.widgetSearchBar.getFilter().toLowerCase() : "";
+        return this.getSearchBarWidget() != null ? this.getSearchBarWidget().getFilter().toLowerCase() : "";
     }
 
     protected boolean entryMatchesFilter(TYPE entry, String filterText)
@@ -383,9 +389,9 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
     {
         RenderUtils.color(1f, 1f, 1f, 1f);
 
-        if (this.widgetSearchBar != null)
+        if (this.getSearchBarWidget() != null)
         {
-            this.widgetSearchBar.render(mouseX, mouseY, false);
+            this.getSearchBarWidget().render(mouseX, mouseY, false);
         }
 
         WidgetBase hovered = null;
@@ -424,9 +430,9 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
             }
         }
 
-        if (hovered == null && this.widgetSearchBar != null && this.widgetSearchBar.isMouseOver(mouseX, mouseY))
+        if (hovered == null && this.getSearchBarWidget() != null && this.getSearchBarWidget().isMouseOver(mouseX, mouseY))
         {
-            hovered = this.widgetSearchBar;
+            hovered = this.getSearchBarWidget();
         }
 
         if (hovered != null)

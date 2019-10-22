@@ -17,6 +17,7 @@ import fi.dy.masa.malilib.gui.wrappers.TextFieldWrapper;
 import fi.dy.masa.malilib.interfaces.IStringConsumer;
 import fi.dy.masa.malilib.render.MessageRenderer;
 import fi.dy.masa.malilib.render.RenderUtils;
+import fi.dy.masa.malilib.util.StringUtils;
 import fi.dy.masa.malilib.util.InputUtils;
 import fi.dy.masa.malilib.util.KeyCodes;
 import net.minecraft.client.Minecraft;
@@ -452,7 +453,7 @@ public abstract class GuiBase extends GuiScreen implements IMessageConsumer, ISt
             {
                 for (String line : lines)
                 {
-                    width = Math.max(width, this.getStringWidth(line));
+                    width = Math.max(width, this.getStringWidth(StringUtils.translate(line)));
                 }
             }
         }
