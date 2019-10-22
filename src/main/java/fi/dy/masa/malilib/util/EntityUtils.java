@@ -13,7 +13,7 @@ public class EntityUtils
     @Nullable
     public static Entity getCameraEntity()
     {
-        Minecraft mc = Minecraft.getMinecraft();
+        Minecraft mc = Minecraft.getInstance();
         Entity entity = mc.getRenderViewEntity();
 
         if (entity == null)

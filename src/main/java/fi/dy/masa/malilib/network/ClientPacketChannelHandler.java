@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.google.common.base.Charsets;
+import fi.dy.masa.malilib.MaLiLib;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.util.ResourceLocation;
-import fi.dy.masa.malilib.LiteModMaLiLib;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -78,7 +78,7 @@ public class ClientPacketChannelHandler implements IClientPacketChannelHandler
      */
     public boolean processPacketFromServer(SPacketCustomPayload packet, NetHandlerPlayClient netHandler)
     {
-        ResourceLocation channel = new ResourceLocation(packet.getChannelName());
+        ResourceLocation channel = packet.getChannelName();
         IPluginChannelHandler handler = this.handlers.get(channel);
 
         if (handler != null)
@@ -101,9 +101,9 @@ public class ClientPacketChannelHandler implements IClientPacketChannelHandler
     {
         String joinedChannels = channels.stream().map(ResourceLocation::toString).collect(Collectors.joining("\0"));
         ByteBuf payload = Unpooled.wrappedBuffer(joinedChannels.getBytes(Charsets.UTF_8));
-        CPacketCustomPayload packet = new CPacketCustomPayload(type.toString(), new PacketBuffer(payload));
+        CPacketCustomPayload packet = new CPacketCustomPayload(type, new PacketBuffer(payload));
 
-        NetHandlerPlayClient handler = Minecraft.getMinecraft().getConnection();
+        NetHandlerPlayClient handler = Minecraft.getInstance().getConnection();
 
         if (handler != null)
         {
@@ -111,7 +111,7 @@ public class ClientPacketChannelHandler implements IClientPacketChannelHandler
         }
         else
         {
-            LiteModMaLiLib.logger.warn("Failed to send register channel packet - network handler was null");
+            MaLiLib.logger.warn("Failed to send register channel packet - network handler was null");
         }
     }
 }

@@ -227,7 +227,7 @@ public abstract class WidgetListBase<TYPE, WIDGET extends WidgetListEntryBase<TY
 
     protected boolean onCharTypedSearchBar(char charIn, int modifiers)
     {
-        if (this.getSearchBarWidget() != null && this.getSearchBarWidget().onKeyTyped(charIn, modifiers))
+        if (this.getSearchBarWidget() != null && this.getSearchBarWidget().onCharTyped(charIn, modifiers))
         {
             this.clearSelection();
             this.refreshBrowserEntries();

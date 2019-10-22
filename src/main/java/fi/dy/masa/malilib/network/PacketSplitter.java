@@ -33,12 +33,12 @@ public class PacketSplitter
 
     public static void send(NetHandlerPlayServer networkHandler, ResourceLocation channel, PacketBuffer packet)
     {
-        send(packet, MAX_PAYLOAD_PER_PACKET_S2C, buf -> networkHandler.sendPacket(new SPacketCustomPayload(channel.toString(), buf)));
+        send(packet, MAX_PAYLOAD_PER_PACKET_S2C, buf -> networkHandler.sendPacket(new SPacketCustomPayload(channel, buf)));
     }
 
     public static void send(NetHandlerPlayClient networkHandler, ResourceLocation channel, PacketBuffer packet)
     {
-        send(packet, MAX_PAYLOAD_PER_PACKET_C2S, buf -> networkHandler.sendPacket(new CPacketCustomPayload(channel.toString(), buf)));
+        send(packet, MAX_PAYLOAD_PER_PACKET_C2S, buf -> networkHandler.sendPacket(new CPacketCustomPayload(channel, buf)));
     }
 
     private static void send(PacketBuffer packet, int payloadLimit, Consumer<PacketBuffer> sender)
@@ -91,7 +91,7 @@ public class PacketSplitter
     @Nullable
     private static PacketBuffer receive(NetHandlerPlayClient networkHandler, SPacketCustomPayload message, int maxLength)
     {
-        Pair<INetHandler, ResourceLocation> key = Pair.of(networkHandler, new ResourceLocation(message.getChannelName()));
+        Pair<INetHandler, ResourceLocation> key = Pair.of(networkHandler, message.getChannelName());
 
         return READING_SESSIONS.computeIfAbsent(key, ReadingSession::new).receive(message.getBufferData(), maxLength);
     }
@@ -105,7 +105,7 @@ public class PacketSplitter
     @Nullable
     private static PacketBuffer receive(String channelName, PacketBuffer rawData, int maxLength)
     {
-        Pair<INetHandler, ResourceLocation> key = Pair.of(Minecraft.getMinecraft().getConnection(), new ResourceLocation(channelName));
+        Pair<INetHandler, ResourceLocation> key = Pair.of(Minecraft.getInstance().getConnection(), new ResourceLocation(channelName));
 
         return READING_SESSIONS.computeIfAbsent(key, ReadingSession::new).receive(rawData, maxLength);
     }
